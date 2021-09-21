@@ -1,0 +1,135 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
+<title>Документация по Cи, C++ и Visual C++</title>
+</head>
+
+<body background="../../background/bg6.gif" link="Black" vlink="Black" topmargin=2
+leftmargin="5" bgcolor="Aqua">
+
+<p align="center"><strong><big><font face="Arial" color="Maroon">Операторы break
+и continue&nbsp;</font><font color="#FF0000" face="Arial">&nbsp; </font></big></strong></p>
+<div align="center"><center>
+
+<table width="90%" height="132" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="100%" height="132"><p align="left"><strong><font face="Arial" color="#0080FF"><big>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Стр. 14 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </big></font><font
+    face="Arial" color="#800000"><small>&lt; <a href="../visual_docum1.htm" target="_self"
+    style="color: rgb(128,64,64)">оглавление </a>&gt;</small></font></strong><font
+    face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></p>
+    <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Часто при
+    вознекновении некоторого события удобно иметь
+    возможность досрочно завершить цикл.
+    Используемый для этой цели оператор <strong>break </strong>(разрыв)
+    вызывает немедленный выход из циклов,
+    организуемых с помощью операторов <strong>for, while,
+    do-while, </strong>а также прекращение оператора <strong>switch</strong>.
+    Приведенная ниже программа обеспечивает поиск в
+    заданном иассиве элемента, равного <strong>g </strong>(пример
+    4.9). В случае обнаружения такого элемента
+    оператор <strong>break </strong>прекращает дальнейшее
+    выполнение цикла. Так как параметр <strong>i </strong>сохраняет
+    значение после выхода из цикла, то дальнейший
+    анализ его значения (<strong>if(i==n)</strong>) позволяет
+    судить об удачном <strong>(i&lt;=n)&nbsp; </strong>илинеудачном
+    (<strong>i==n</strong>) поиске. В случае вложенных циклов
+    оператор <strong>break </strong>немедленно прекращает
+    выполнение самого внутреннего из объемлющих его
+    циклов.</p>
+    <p align="left">&nbsp; Пример 4.9</p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="48%">
+      <tr>
+        <td width="100%"><strong>/*линейный поиск*/<br>
+        #include &lt;stdio.h&gt;<br>
+        int a[]={1,2,3,33,5,6,0,8};<br>
+        int n=8;<br>
+        main()<br>
+        {<br>
+        int i,g=33;<br>
+        for(i=0;i&lt;n;i++)<br>
+        if(a[i]==g)<br>
+        break;<br>
+        if(i==n)<br>
+        printf(&quot;%d не найден\n&quot;,g);<br>
+        else<br>
+        printf(&quot;%d на %d месте \n&quot;g,i);<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left"><font face="Times New Roman" color="#000000"><strong>&nbsp;
+    </strong>На примере 5.0 приведена программа, которая
+    ведет подсчет числа различных элементов в
+    массиве. Каждый очередной элемент <strong>a[i] </strong>сравнивается
+    с последующими элементами массива. Если он не
+    совпадает ни с одним из этих элементов, в счетчик <strong>k</strong>
+    добавляется еденица. В противном случае
+    внутренний цикл прерывается оператором <strong>break </strong>и
+    начинается новая итерация внешнего цикла.</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Пример 5.0</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="51%">
+      <tr>
+        <td width="100%"><strong>/*число разных элементов*/<br>
+        #include &lt;stdio.h&gt;<br>
+        main()<br>
+        {<br>
+        static a[]={7,3,7,4,3,6};<br>
+        int i,j,m,k=1;m=6;<br>
+        for(i=0;i&lt;m-1;i++)<br>
+        {<br>
+        &nbsp; for(j=i+1;j&lt;m;j++)<br>
+        if(a[i]==a[j])<br>
+        break;<br>
+        if(j==m)<br>
+        k++;<br>
+        }<br>
+        printf(&quot;%d разных элем. \n&quot;, k);<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left">&nbsp; Оператор <strong>continue </strong>тоже
+    предназначен для прерывания циклического
+    процесса, организуемого операторами <strong>for, while,
+    do-while. </strong>Но в отличае от оператора <strong>break</strong>,
+    он не прекращает дальнейшее выполнение цикла, а
+    только немедленно переходит к следующей
+    интерации того цикла, в теле которого он
+    оказался. Он как бы имитирует безусловный
+    переход на конечный оператор цикла, но не за ее
+    пределы самого цикла. Программа на примере 5.1
+    использует оператор <strong>continue </strong>для пропуска
+    отрицательных элементов массива, суммируя
+    только положительные.</p>
+    <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Пример 5.1</p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="59%">
+      <tr>
+        <td width="100%"><strong>#include &lt;stdio.h&gt;<br>
+        main()<br>
+        {<br>
+        static int a[]={1,2,-3,4,-5,6};<br>
+        int i,n,s;<br>
+        n=6; s=0;<br>
+        for(i=0; i&lt;n; i++)<br>
+        {<br>
+        if(a[i]&lt;=0)<br>
+        continue; /*пропуск 0*/<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; s+=a[i];<br>
+        &nbsp;&nbsp;&nbsp;&nbsp; }<br>
+        printf(&quot;сумма = %d \n&quot;,s);<br>
+        }<br>
+        </strong></td>
+      </tr>
+    </table>
+    </center></div><p align="center"><font face="Arial" color="#804040"><small><strong>&lt; <a
+    href="book013.htm" target="_self" style="color: rgb(128,64,64)">Назад</a> &gt;
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt; <a href="book015.htm"
+    style="color: rgb(128,64,64)">Дальше</a> &gt;</strong></small></font><br>
+    </td>
+  </tr>
+</table>
+</center></div>
+</body>
+</html>

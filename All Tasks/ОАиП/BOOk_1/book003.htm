@@ -1,0 +1,138 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
+<title>Документация по Cи, C++ и Visual C++</title>
+</head>
+
+<body background="../../background/bg6.gif" link="#000000" vlink="#000000" topmargin="2"
+leftmargin="5" bgcolor="#B3FFD9">
+
+<dl>
+  <p align="center"><font face="Arial" color="maroon"><strong><big>Основные
+  типы данных, операции и выражения</big></strong></font></p>
+  <div align="center"><center><table border="0" width="90%"
+   bgcolor="#B3FFD9"
+  cellspacing="0" cellpadding="0" bordercolorlight=""
+   bordercolordark="">
+    <tr>
+      <td width="100%"><p align="left"><strong><font face="Arial" color="#0080FF"><big>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      Стр. 3 </big></font><font face="Arial" color="#800000"><small>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      &lt; <a href="../visual_docum1.htm" target="_self" style="color: rgb(128,64,64)">оглавление
+      </a>&gt;</small></font></strong></p>
+      <p align="left">Основные объекты, с которыми работает
+      программа на языке Си - переменные и константы. <strong>Переменные
+      - </strong>поименнованые величины, значения которых,
+      в отличае от констант могут меняться а процессе
+      выполнения программы. Все переменные должны быть
+      описаны; в описаниях указываются их типы и,
+      возможно, начальные значения. Константам могут
+      быть присвоены имена- синонимы констант в
+      программе.</p>
+      <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Имена
+      переменных. </strong>Имена могут состоять из букв
+      латинского алфавита, цифр и символа
+      подчеркивания &quot;_&quot;, который считается буквой.
+      Строчные и прописные буквы различаются Beta, beta , BETA
+      - разные имена. Число символов в имени не
+      ограничено. В качестве имен переменных нельзя
+      исползовать зарезервированные слова типа if, else,
+      for, char, int и т.д. Все служебные слова должны быть
+      набраны малыми буквами.</p>
+      <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Типы
+      данных. </strong>В языке Си имеются два существенно
+      различных типа данных:<strong> int</strong>- целый и <strong>float</strong>
+      - вещественный(с плавающей точкой). Из них можно
+      создавать еще два типа: <strong>char - символьный</strong> ,<strong>
+      double - вещественный с двойной точности. </strong>Из
+      этих четырех базовых типов может быть получено
+      много других типов. При необходимости
+      программист может изобрести любой&nbsp; желаемый
+      тип данных.<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Целые<strong>
+      &nbsp; </strong>константы и константы с плавающей
+      точкой записываются в общепринятой для языков
+      программирования форме: </p>
+      <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <strong>13, -941, 0, 76; 13.0, 13E+0, -1.76, 0.123e-2, 6.02E23</strong></p>
+      <p align="left">Плавающяя константа состоит из
+      десятичной целой части, десятичной точки,
+      десятичной дробной части и степени, которая
+      состоит из буквы <strong>E</strong> или <strong>е</strong>, за
+      которой следует десятичный порядок. Перед
+      показателями может стоять знак (+ или -). Либо
+      десятичная точка, либо показатель, но не оба
+      одновременно, могут быть опущены либо целая, либо
+      дробная части.<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; В языке Си существуют
+      правила записи восьмеричных и шестнадцате-
+      ричных &nbsp; чисел: если перед целым числом идет 0
+      (нуль). то это восьмеричная константа: 037, 0776;
+      начальные 0X или 0x указывают на шестнадцатеричное
+      число: 0x f37, 0X1FA. </p>
+      <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Символьная
+      константа </strong>состоит из заключенного в
+      одиночные ковычки символа, например<strong> ' * ' . </strong>Символы
+      в языке Си фактически являются целочисленными
+      значениями. Их числовое значение соответствует
+      внутреннему (машинному) представлению символов и
+      некотором принятом стандартном коде. Например, в
+      коде <strong>ASCII</strong>, широко применяемом в мини- и
+      микрокомпьютерах, значение символа <strong>' A ' </strong>равно
+      <strong>65, ' b ' - 98, ' 2' - 50. <br>
+      </strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Символы, не имеющие
+      графического изображения, и некоторые
+      спечиальные символы записываются следующим
+      образом: <strong>\n </strong>- новая строка, <strong>\t</strong> -
+      табуляция, <strong>\0</strong> - нуль (пусто - конец строки),<strong>
+      \\ </strong>- обратная&nbsp; косая черта, <strong>\'</strong>
+      апостроф, \<strong>b</strong> - возрат на шаг,<strong> \r </strong>-
+      возрат коретки, <strong>\f</strong> - перевод страницы.
+      Присвоение константам сиволических имен
+      происходит с помощью процессорного утверждения
+      &nbsp; <strong>#define. </strong>Например, запись <strong>#define MAX 100 </strong>перед
+      текстом основной программы определяет имя <strong>MAX,
+      </strong>являющееся синонимом константы <strong>100</strong>. </p>
+      <p align="left">&nbsp;&nbsp;&nbsp; <strong>Строковая </strong>константа
+      - это последовательность нуля и более символов,
+      заключенная в двойные кавычки, например <strong>&quot;Интересное
+      сообщение&quot;&nbsp; </strong>или <strong>&quot; &quot;</strong> -
+      пустая строка. В конце каждой такой строки
+      транслятор помещяет нулевой символ <strong>\0, </strong>что
+      сильно облегчает программисту поиск конца
+      строки. Технически строка символов представляет
+      собой одномерный массив, каждый елемент которого
+      - один символ. </p>
+      <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Описание
+      переменных. </strong>Все перменные должны быть
+      описаны до их испрльзования. Описание задает тип,
+      за которым следует список одной или более
+      переменных этого типа. Например: </p>
+      <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <strong>int a, b; int low;&nbsp; char c;&nbsp; float x, dl;</strong></p>
+      <p align="left">Переменным в описаниях можно задавать
+      начальные значения, объединяя таким образом
+      описание и оператор присваивания. </p>
+      <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      <strong>&nbsp; int&nbsp; p = 1; float eps = 1.0 e-5;</strong></p>
+      <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>Арифметические
+      операции. </strong>Существуют арифметические
+      операции: <strong>+, - , * , / </strong>и вычисление остатка
+      от деления -&nbsp; <strong>%. </strong>Есть унарная операция -
+      (унарный минус). При делении целых чисел дробная
+      часть отбрасывается. Порядок выполнения
+      операциями совпадает с общепринятыми: операции +
+      и- имеют одинаковый приоритет, причем он ниже
+      приоретета операций <strong>/, * </strong>и <strong>% . </strong>Самый
+      высокий приоритет унарный минус. </p>
+      <p align="center"><font face="Arial" color="#804040"><small><strong>&nbsp;&lt; <a
+      href="book002.htm" target="_self" style="color: rgb(128,64,64)">Назад</a> &gt;
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt; <a href="book004.htm"
+      style="color: rgb(128,64,64)" target="_self">Дальше</a> &gt;&nbsp;<br>
+      &nbsp;&nbsp; </strong></small></font></td>
+    </tr>
+  </table>
+  </center></div>
+</dl>
+</body>
+</html>

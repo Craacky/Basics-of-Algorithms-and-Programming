@@ -1,0 +1,3597 @@
+     gcvt
+──────────────────────────────────────────────────────────────
+Функция        Преобразует число с плавающей точкой в строку.
+
+Синтаксис      #include <stdlib.h>
+               char *gcvt(double value, int ndec, char *buf);
+
+Прототип в     stdlib.h
+
+Примечания     Преобразует value в  ASCII-строку,  завершаемую
+               нуль-символом, и  помещает ее в  *buf. Если это
+               возможно, порождается ndec значащих цифр в фор-
+               мате F языка FORTRAN;  в противном случае возв-
+               ращается значение в формате E функции printf (в
+               готовом для печати виде). Незначащие нули могут
+               подавляться.
+
+Значение       Возвращает адрес строки,  на которую  указывает
+               buf.
+
+Переносимость  Эта функция доступна в системах  UNIX.  Она  не
+               содержится в ANSI C и не рекомендуется для  пе-
+               реносимых программ.
+
+См. также      ecvt, fcvt, sprinf
+
+Пример         #include <stdlib.h>
+               #include <stdio.h>
+               int main(void)
+               {  char str[25];
+                  double num;
+                  int sig = 5; /* значащие цифры */
+                  /* обычное число */
+                  num = 9.876;
+                  gcvt(num, sig, str);
+                  printf("string = %s\n", str);
+                  /* отрицательное число */
+                  num = -123.4567;
+                  gcvt(num, sig, str);
+                  printf("string = %s\n", str);
+                  /* научная нотация */
+                  num = 0.678e5;
+                  gcvt(num, sig, str);
+                  printf("string = %s\n", str);
+                  return(0);
+               }
+
+     geninterrupt
+──────────────────────────────────────────────────────────────
+Функция        Генерирует программное прерывание.
+
+Синтаксис      #include <dos.h>
+               void geninterrupt(int intr_num);
+
+Прототип в     dos.h
+
+Примечания     Этот макрос генерирует программное  прерывание,
+               номер которого задан в intr_num. Состояние всех
+               регистров после вызова  зависит  от  вызванного
+               прерывания.
+         !!!   Прерывания могут оставить регистры,  используе-
+               мые C, в непредсказуемом состоянии.
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только для процессоров ар-
+               хитектуры 8086.
+
+См. также      bdos, bdosptr, disable, enable, getvect, int86,
+               int86x, intdos, intdosx, intr
+
+Пример         #include <conio.h>
+               #include <dos.h>
+               /* прототип функции */
+               void writechar(char ch);
+               int main(void)
+               {  clrscr();
+                  gotoxy(80,25);
+                  writechar('*');
+                  getch();
+                  return 0;
+               }
+               /* вывод символа в текущую позицию
+                  курсора, используя видеосервис BIOS,
+                  чтобы избежать скроллинга экрана
+                  при выводе в позиции (80,25)       */
+               void writechar(char ch)
+               {  struct text_info ti;
+                  /* получение текущих текстовых установок */
+                  gettextinfo(&ti);
+                  _AH = 9; /* функция 9 прерывания 0x10 */
+                  _AL = ch; /* символ для вывода */
+                  _BH = 0; /* видеостраница */
+                  _BL = ti.attribute;  /* видеоатрибут */
+                  _CX = 1; /* коэффициент повторения */
+                  geninterrupt(0x10);  /* вывод символа */
+               }
+
+     getarccoords
+──────────────────────────────────────────────────────────────
+Функция        Получает координаты, использованные при послед-
+               нем вызове arc.
+
+Синтаксис      #include <graphics.h>
+               void far getarccoords
+                        (struct arccoordstype far *arccords);
+
+Прототип в     graphics.h
+
+Примечания     Помещает   в   структуру   типа   arccoordstype
+               информацию  о  последнем  вызове  функции  arc;
+               arccoords  -  указатель   на   эту   структуру.
+               Структура arccoordstype определена в graphics.h
+               следующим образом:
+                  struct arccoordstype {
+                     int x, y;
+                     int xstart, ystart, xend, yend;
+                  };
+               Элементы этой структуры используются для указа-
+               ния  центра  (x,  y),  начальной точки (xstart,
+               ystart) и конечной точки (xend, yend) дуги. Эти
+               значения могут оказаться полезными, если Вы за-
+               хотите, например, провести линию из какого-либо
+               конца дуги.
+
+Значение       Нет.
+
+Переносимость  Уникальна для Turbo C++. Работает только на IBM PC и
+               совместимых с   ней,   поддерживающих    графические
+               дисплейные адаптеры.
+
+См. также      arc, fillellipse, sector
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  struct arccoordstype arcinfo;
+                  int midx, midy;
+                  int stangle = 45, endangle = 270;
+                  char sstr[80], estr[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)   /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                             grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* рисуем дугу и получаем ее координаты */
+                  setcolor(getmaxcolor());
+                  arc(midx, midy, stangle, endangle, 100);
+                  getarccoords(&arcinfo);
+                  /* преобразование информации
+                     о дуге в строки           */
+                  sprintf(sstr, "*- (%d, %d)",
+                          arcinfo.xstart, arcinfo.ystart);
+                  sprintf(estr, "*- (%d, %d)",
+                          arcinfo.xend, arcinfo.yend);
+                  /* вывод информации о дуге */
+                  outtextxy(arcinfo.xstart,
+                            arcinfo.ystart, sstr);
+                  outtextxy(arcinfo.xend,
+                            arcinfo.yend, estr);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getaspectratio
+──────────────────────────────────────────────────────────────
+Функция        Извлекает значения корректирующих коэффициентов
+               масштабирования по осям (aspect ratio) для  те-
+               кущего графического режима.
+
+Синтаксис      #include <graphics.h>
+               void far getaspectratio(int far *xasp,
+                                       int far *yasp);
+
+Прототип в     graphics.h
+
+Примечания     Корректирующий коэффициент  масштабирования  по
+               оси y (y aspect factor),  *yasp,  принят равным
+               10000.  Для  всех графических адаптеров,  кроме
+               VGA, корректирующий коэффициент масштабирования
+               по  оси  x  (x  aspect factor),  *xasp,  меньше
+               *yasp,  потому что пикселы вытянуты  в  высоту.
+               Для  VGA,  который  имеет "квадратные" пикселы,
+               *xasp = *yasp. Вообще говоря, соотношения между
+               *yasp и *xasp таковы:
+                  *yasp = 10000
+                  *xasp <= 10000
+               getaspectratio помещает  извлеченные значения в
+               *xasp и *yasp.
+
+Значение       Нет.
+
+Переносимость  Аналогичная процедура  имеется  в Turbo Pascal.
+               Эта функция не совместима с Windows.
+
+См. также      arc, circle,  ellipse,  fillellipse,  pieslice,
+               sector, setaspectratio
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int xasp, yasp, midx, midy;
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)   /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                             grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  setcolor(getmaxcolor());
+                  /* получаем текущие установки аспекта */
+                  getaspectratio(&xasp, &yasp);
+                  /* рисуем обычную окружность */
+                  circle(midx, midy, 100);
+                  getch();
+                  /* рисуем широкую окружность */
+                  cleardevice();
+                  setaspectratio(xasp/2, yasp);
+                  circle(midx, midy, 100);
+                  getch();
+                  /* рисуем узкую окружность */
+                  cleardevice();
+                  setaspectratio(xasp, yasp/2);
+                  circle(midx, midy, 100);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getbkcolor
+──────────────────────────────────────────────────────────────
+Функция        Возвращает текущий цвет фона.
+
+Синтаксис      #include <graphics.h>
+               int far getbkcolor(void);
+
+Прототип в     graphics.h
+
+Примечания     Возвращает текущий  цвет  фона.  (Подробнее см.
+               таблицу к функции setbkcolor).
+
+Значение       Текущий цвет фона.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getcolor, getmaxcolor, getpalette, setbkcolor
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <string.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int bkcolor, midx, midy;
+                  char bkname[35];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)   /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                             grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  setcolor(getmaxcolor());
+                  /* центрируем текст на дисплее */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  /* получаем текущий фоновый цвет */
+                  bkcolor = getbkcolor();
+                  /* преобразование значения цвета в строку */
+                  itoa(bkcolor, bkname, 10);
+                  strcat(bkname,
+                       " is the current background color.");
+                  /* вывод сообщения */
+                  outtextxy(midx, midy, bkname);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getc
+──────────────────────────────────────────────────────────────────
+Функция        Вводит символ из потока ввода-вывода.
+
+Синтаксис      #include <stdio.h>
+               int getc(FILE *stream);
+
+Прототип в     stdio.h
+
+Примечания     getc - это макрос, который возвращает очередной
+               символ из заданного входного потока и перемеща-
+               ет  указатель  файла в потоке на следующий сим-
+               вол.
+
+Значение       В случае успешного завершения возвращается счи-
+               танный символ,  преобразованный в значение типа
+               int без знакового бита.  При  достижении  конца
+               файла или ошибке возвращается EOF.
+
+Переносимость  Эта функция доступна в системах UNIX и  опреде-
+               лена  в  ANSI  C.  Она совместима с Kernighan &
+               Ritchie.
+
+См. также      fgetc, getch,   getchar,  getche,  gets,  putc,
+               putchar, ungetc
+
+Пример         #include <stdio.h>
+               int main(void)
+               {  char ch;
+                  printf("Input a character:");
+                  /* читаем символ из стандартного
+                     входного потока */
+                  ch = getc(stdin);
+                  printf("The character input was: '%c'\n",
+                         ch);
+                  return 0;
+               }
+
+     getcbrk
+──────────────────────────────────────────────────────────────
+Функция        Получает состояние проверки на Ctrl- Break.
+
+Синтаксис      #include <dos.h>
+               int getcbrk(void);
+
+Прототип в     dos.h
+
+Примечания     Использует системную функцию DOS 0x33 для возв-
+               рата текущего состояния проверки на Ctrl-Break.
+
+Значение       При выключенной  проверке на Ctrl-Break возвра-
+               щается 0; при включенной возвращается 1.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      ctrlbrk, setcbrk
+
+Пример         #include <stdio.h>
+               #include <dos.h>
+               int main(void)
+               {  if (getcbrk())
+                     printf("Cntrl-brk flag is on\n");
+                  else
+                     printf("Cntrl-brk flag is off\n");
+                  return 0;
+               }
+
+     getch
+──────────────────────────────────────────────────────────────
+Функция        Читает символ с клавиатуры без  отображения  на
+               экране.
+
+Синтаксис      #include <conio.h>
+               int getch(void);
+
+Прототип в     conio.h
+
+Примечания     Читает один символ непосредственно с клавиатуры
+               без отображения на экран.
+
+Значение       Считанный символ.
+
+Переносимость  Эта функция доступна только в DOS.  Она не сов-
+               местима с Windows.
+
+См. также      cgets, cscanf, fgetc, getchar, getche, getpass,
+               kbhit, putch, ungetch
+
+Пример         #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  int c;
+                  int extended = 0;
+                  c = getch();
+                  if (!c)
+                     extended = getch();
+                  if (extended)
+                     printf("The character is extended\n");
+                  else
+                     printf("The character isn't extended\n");
+                  return 0;
+               }
+
+     getchar
+──────────────────────────────────────────────────────────────
+Функция        Читает символ  из  стандартного входного потока
+               (stdin).
+
+Синтаксис      #include <stdio.h>
+               int getchar(void);
+
+Прототип в     stdio.h
+
+Примечания     getchar - это макрос,  который возвращает  оче-
+               редной  символ  из стандартного входного потока
+               (stdin). Он определяется как getc(stdin).
+
+Значение       В случае успешного завершения возвращается счи-
+               танный символ,  преобразованный в значение типа
+               int без знакового бита.  При  достижении  конца
+               файла или ошибке возвращается EOF.
+
+Переносимость  Эта функция доступна в системах UNIX и  опреде-
+               лена  в  ANSI  C.  Она совместима с Kernighan &
+               Ritchie. Эта функция не совместима с Windows.
+
+См. также      fgetc, fgetchar,  getc,  getch,  getche,  gets,
+               putc, putchar, scanf, ungetc
+
+Пример         #include <stdio.h>
+               int main(void)
+               {  int c;
+                  /* Замечание: функция getchar читает
+                     из потока stdin с построчной
+                     буферизацией; это означает, что
+                     значение не будет возвращено, пока
+                     не будет нажата клавиша <ENTER> */
+                  while ((c = getchar()) != '\n')
+                     printf("%c", c);
+                  return 0;
+               }
+
+     getche
+──────────────────────────────────────────────────────────────
+Функция        Читает символ  с  клавиатуры,  отображая его на
+               экране.
+
+Синтаксис      #include <conio.h>
+               int getche(void);
+
+Прототип в     conio.h
+
+Примечания     Читает один символ непосредственно с клавиатуры
+               и отображает  его  в  текущем  текстовом  окне,
+               используя прямой вывод в видеопамять или сервис
+               BIOS.
+
+Значение       Считанный символ.
+
+Переносимость  Эта функция доступна только в DOS.  Она не сов-
+               местима с Windows.
+
+См. также      cgets, cscanf,  fgetc,  getc,  getch,  getchar,
+               kbhit, putch, ungetch
+
+Пример         #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  char ch;
+                  printf("Input a character:");
+                  ch = getche();
+                  printf("\nYou input a '%c'\n", ch);
+                  return 0;
+               }
+
+     getcolor
+──────────────────────────────────────────────────────────────
+Функция        Возвращает текущий цвет линий.
+
+Синтаксис      #include <graphics.h>
+               int far getcolor(void);
+
+Прототип в     graphics.h
+
+Примечания     getcolor возвращает текущий цвет линий. Текущий
+               цвет линий - это цвет,  в который  устанавлива-
+               ются  пикселы при рисовании линий или чего-либо
+               иного.  Например, в режиме CGAC0 палитра содер-
+               жит  4  цвета: цвет фона, светло-зеленый, свет-
+               ло-красный и желтый.  В  этом  режиме  getcolor
+               возвратит  1, когда текущий цвет - светло-зеле-
+               ный.
+
+Значение       Текущий цвет линий.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getbkcolor, getmaxcolor, getpalette, setcolor
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <string.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int color, midx, midy;
+                  char colname[35];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)   /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                             grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  setcolor(getmaxcolor());
+                  /* центрируем текст на дисплее */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  /* получаем текущий цвет линий */
+                  color = getcolor();
+                  /* преобразование значения цвета в строку */
+                  itoa(color, colname, 10);
+                  strcat(colname,
+                         " is the current drawing color.");
+                  /* вывод сообщения */
+                  outtextxy(midx, midy, colname);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getcurdir
+──────────────────────────────────────────────────────────────
+Функция        Получает текущий справочник для указанного уст-
+               ройства.
+
+Синтаксис      #include <dir.h>
+               int getcurdir(int drive, char *directory);
+
+Прототип в     dir.h
+
+Примечания     getcurdir получает имя текущего справочника для
+               устройства, указанного в drive. drive определя-
+               ет номер устройства (0 для текущего,  1 для А и
+               т.д.).
+               directory указывает на  область  памяти  длиной
+               MAXDIR, где будет расположено имя справочника -
+               строка, завершаемая  нуль-символом.  Это имя не
+               содержит  спецификации устройства  и не начина-
+               ется с обратного слэша (\).
+
+Значение       При успешном завершении возвращается 0,  в слу-
+               чае ошибки возвращается -1.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      chdir, getcwd, getdisk, mkdir, rmdir
+
+Пример         #include <dir.h>
+               #include <stdio.h>
+               #include <string.h>
+               char *current_directory(char *path)
+               {  /* заполняем строку формой ответа: X:\ */
+                  strcpy(path, "X:\\");
+                  /* замещаем X буквой текущего драйвера */
+                  path[0] = 'A' + getdisk();
+                  /* заполняем остаток строки
+                     именем текущего справочника */
+                  getcurdir(0, path+3);
+                  return(path);
+               }
+               int main(void)
+               {  char curdir[MAXPATH];
+                  current_directory(curdir);
+                  printf("The current directory is %s\n",
+                         curdir);
+                  return 0;
+               }
+
+     getcwd
+──────────────────────────────────────────────────────────────
+Функция        Получает текущий справочник.
+
+Синтаксис      #include <dir.h>
+               char *getcwd(char *buf, int buflen);
+
+Прототип в     dir.h
+
+Примечания     Получает полное  имя (включая устройство) теку-
+               щего справочника до buflen  длиной  и  помещает
+               его  в *buf. Если полное имя  (включая заверша-
+               ющий  нуль-символ)  длиннее  buflen,  возникает
+               ошибка.
+               Если buf = NULL, буфер длиной buflen байтов бу-
+               дет распределен автоматически с помощью malloc.
+               Вы можете позднее освободить этот буфер,  пере-
+               давая значение, возвращенное из getcwd, функции
+               free.
+
+Значение       getcwd возвращает следующие значения:
+               - если buf не NULL, возвращается buf при успеш-
+                 ном завершении и NULL при ошибке.
+               - Если buf = NULL,  возвращается  указатель  на
+                 распределенный буфер.
+               При ошибке глобальная переменная errno устанав-
+               ливается в одно из следующих значений:
+                  ENODEV   Устройство отсутствует
+                  ENOMEM   Недостаточно памяти
+                  ERANGE   Результат вне допустимого диапазона
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      chdir, getcurdir, getdisk, mkdir, rmdir
+
+Пример         #include <stdio.h>
+               #include <dir.h>
+               int main(void)
+               {  char buffer[MAXPATH];
+                  getcwd(buffer, MAXPATH);
+                  printf("The current directory is: %s\n",
+                         buffer);
+                  return 0;
+               }
+
+     getdate
+──────────────────────────────────────────────────────────────
+Функция        Получает системную дату.
+
+Синтаксис      #include <dos.h>
+               void getdate(struct date *datep);
+
+Прототип в     dos.h
+
+Примечания     Помещает в структуру  типа date текущую систем-
+               ную дату; datep - указатель на эту структуру.
+               Структура date определена следующим образом:
+                  struct date {
+                     int da_year;   /* год */
+                     char da_day;   /* день месяца */
+                     char da_mon;   /* месяц (1 = январь) */
+                  };
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      ctime, gettime, setdate, settime
+
+Пример         #include <dos.h>
+               #include <stdio.h>
+               int main(void)
+               {  struct date d;
+                  getdate(&d);
+                  printf("The current year is: %d\n",
+                         d.da_year);
+                  printf("The current day is: %d\n",
+                         d.da_day);
+                  printf("The current month is: %d\n",
+                         d.da_mon);
+                  return 0;
+               }
+
+     getdefaultpalette
+──────────────────────────────────────────────────────────────
+Функция        Возвращает структуру определения палитры.
+
+Синтаксис      #include <graphics.h>
+               struct palettetype *far getdefaultpalette
+                                                       (void);
+
+Прототип в     graphics.h
+
+Примечания     Извлекает структуру palettetype, содержащую па-
+               литру,  инициализированную драйвером при вызове
+               initgraph.
+
+Значение       Возвращает указатель на палитру,  устанавливае-
+               мую по умолчанию текущим драйвером при  инициа-
+               лизации.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getpalette, initgraph
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  /* структура для возвращаемой палитры */
+                  struct palettetype far *pal = NULL;
+                  int i;
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)   /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                             grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  /* возвращает указатель
+                     на палитру по умолчанию */
+                  pal = getdefaultpalette();
+                  for (i = 0; i < pal->size; i++)
+                  {  printf("colors[%d] = %d\n", i,
+                            pal->colors[i]);
+                     getch();
+                  }
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getdfree
+──────────────────────────────────────────────────────────────
+Функция        Получает объем   свободного   пространства   на
+               диске.
+
+Синтаксис      #include <dos.h>
+               void getdfree(unsigned char drive,
+                             struct dfree *dtable);
+
+Прототип в     dos.h
+
+Примечания     getdfree принимает  спецификацию  устройства  в
+               drive (0 для текущего,  1 для А и т.д.) и поме-
+               щает  характеристики  диска  в  структуру  типа
+               dfree; dtable - указатель на эту структуру.
+               Структура dfree определена следующим образом:
+               struct dfree {
+                 unsigned df_avail; /* доступно кластеров */
+                 unsigned df_total; /* всего кластеров */
+                 unsigned df_bsec;  /* байтов в секторе */
+                 unsigned df_sclus; /* секторов в кластере */
+               };
+
+Значение       Не возвращает никакого значения. В случае ошиб-
+               ки поле df_sclus в структуре dfree устанавлива-
+               ется в 0xFFFF.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      getfat, getfatd
+
+Пример         #include <stdio.h>
+               #include <stdlib.h>
+               #include <dir.h>
+               #include <dos.h>
+               int main(void)
+               {  struct dfree free;
+                  long avail;
+                  int drive;
+                  drive = getdisk();
+                  getdfree(drive + 1, &free);
+                  if (free.df_sclus == 0xFFFF) {
+                     printf("Error in getdfree() call\n");
+                     exit(1);
+                  }
+                  avail =  (long) free.df_avail *
+                           (long) free.df_bsec *
+                           (long) free.df_sclus;
+                  printf("Drive %c: has %ld bytes "
+                         "available\n", 'A' + drive, avail);
+                  return 0;
+               }
+
+     getdisk
+──────────────────────────────────────────────────────────────
+Функция        Получает номер текущего устройства.
+
+Синтаксис      #include <dir.h>
+               int getdisk(void);
+
+Прототип в     dir.h
+
+Примечания     getdisk получает номер  текущего  устройства  и
+               возвращает  0  для А,  1 для B,  2 для C и т.д.
+               (равносильно системной функции DOS 0x19).
+
+Значение       Номер текущего устройства.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      getcurdir, getcwd, setdisk
+
+Пример         #include <stdio.h>
+               #include <dir.h>
+               int main(void)
+               {  int disk;
+                  disk = getdisk() + 'A';
+                  printf("The current drive is: %c\n",
+                          disk);
+                  return 0;
+               }
+
+     getdrivername
+──────────────────────────────────────────────────────────────
+Функция        Возвращает указатель на строку,  содержащую имя
+               текущего графического драйвера.
+
+Синтаксис      #include <graphics.h>
+               char *far getdrivername(void);
+
+Прототип в     graphics.h
+
+Примечания     После вызова функции initgraph эта функция воз-
+               вращает имя загруженного графического драйвера.
+
+Значение       Возвращает указатель на строку,  содержащую имя
+               текущего загруженного графического драйвера.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      initgraph
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  /* содержит имя драйвера устройства */
+                  char *drivername;
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)   /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                             grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  setcolor(getmaxcolor());
+                  /* получаем имя драйвера устройства */
+                  drivername = getdrivername();
+                  /* центрируем текст на дисплее */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  /* вывод имени драйвера */
+                  outtextxy(getmaxx() / 2, getmaxy() / 2,
+                            drivername);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getdta
+──────────────────────────────────────────────────────────────
+Функция        Получает адрес таблицы ввода-вывода DOS (DTA).
+
+Синтаксис      #include <dos.h>
+               char far *getdta(void);
+
+Прототип в     dos.h
+
+Примечания     Возвращает текущее значение адреса таблицы вво-
+               да-вывода DOS (DTA).
+               В моделях памяти small и medium предполагается,
+               что  сегмент является текущим сегментом данных.
+               Если Вы используете  исключительно  C,  то  это
+               верно,  однако  ассемблерная подпрограмма может
+               установить DTA  на  любой  аппаратно-допустимый
+               адрес.
+               В моделях compact,  large или huge адрес, возв-
+               ращаемый из getdta -  это  аппаратно-корректный
+               адрес и может быть расположен вне программы.
+
+Значение       Дальний указатель на текущий DTA.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      fcb(structure), setdta
+
+Пример         #include <dos.h>
+               #include <stdio.h>
+               int main(void)
+               {  char far *dta;
+                  dta = getdta();
+                  printf("The current disk transfer "
+                         "address is: %Fp\n", dta);
+                  return 0;
+               }
+
+     getenv
+──────────────────────────────────────────────────────────────
+Функция        Получает строку среды.
+
+Синтаксис      #include <stdlib.h>
+               char *getenv(const char *name);
+
+Прототип в     stdlib.h
+
+Примечания     Возвращает значение указанной переменной среды.
+               Имя переменной может состоять либо из строчных,
+               либо из прописных букв,  но оно не должно вклю-
+               чать знак равенства (=).  Если указанной  пере-
+               менной среды не существует, возвращается NULL.
+
+Значение       При успешном  завершении возвращается значение,
+               установленное для переменной name.  Если  пере-
+               менная  *name не содержится в строках определе-
+               ния среды, возвращается NULL.
+         !!!   Строки определения среды не могут быть изменены
+               непосредственно. Если Вы хотите изменить значе-
+               ние переменной среды,  Вы  должны  использовать
+               функцию putenv.
+
+Переносимость  Эта функция  доступна в системах UNIX и опреде-
+               лена в ANSI C.
+
+См. также      environ(глобальная переменная), getpsp, putenv
+
+Пример         #include <stdlib.h>
+               #include <stdio.h>
+               int main(void)
+               {  char *s;
+                  /* получаем переменную среды COMSPEC */
+                  s = getenv("COMSPEC");
+                  /* вывод ее значения */
+                  printf("Command processor: %s\n", s);
+                  return 0;
+               }
+
+     getfat
+──────────────────────────────────────────────────────────────
+Функция        Получает информацию из таблицы размещения  фай-
+               лов (FAT) для заданного устройства.
+
+Синтаксис      #include <dos.h>
+               void getfat(unsigned char drive,
+                           struct fatinfo *dtable);
+
+Прототип в     dos.h
+
+Примечания     getfat получает  информацию из таблицы размеще-
+               ния файлов  (FAT) для устройства,  указанного в
+               drive.  dtable  -  указатель на структуру  типа
+               fatinfo, в которую помещаются  полученные  дан-
+               ные. Структура fatinfo определена следующим об-
+               разом:
+                 struct fatinfo {
+                   char fi_sclus;   /* секторов в кластере */
+                   char fi_fatid;   /* id-байт FAT */
+                   int fi_nclus;    /* число кластеров */
+                   int fi_bysec;    /* байтов в секторе */
+                 };
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      getdfree, getfatd
+
+Пример         #include <stdio.h>
+               #include <dos.h>
+               #include <conio.h>
+               int main(void)
+               {  struct fatinfo diskinfo;
+                  int flag = 0;
+                  printf("Please insert disk in drive A\n");
+                  getch();
+                  /* получаем информацию об устройстве */
+                  getfat(1, &diskinfo);
+                  printf("\nDrive A: is ");
+                  switch((unsigned char) diskinfo.fi_fatid) {
+                     case 0xFD:
+                        printf("a 360K low density\n");
+                        break;
+                     case 0xF9:
+                        printf("a 1.2 Meg 5-1/4\" or "
+                               "720 K 3-1/2\"\n");
+                        break;
+                     case 0xF0:
+                        printf("1.44 Meg 3-1/2\"\n");
+                        break;
+                     default:
+                        printf("unformatted\n");
+                        flag = 1;
+                  }
+                  if (!flag) {
+                     printf("  sectors per cluster %5d\n",
+                             diskinfo.fi_sclus);
+                     printf("   number of clusters %5d\n",
+                             diskinfo.fi_nclus);
+                     printf("     bytes per sector %5d\n",
+                             diskinfo.fi_bysec);
+                  }
+                  return 0;
+               }
+
+     getfatd
+──────────────────────────────────────────────────────────────
+Функция        Получает информацию  из таблицы размещения фай-
+               лов (FAT).
+
+Синтаксис      #include <dos.h>
+               void getfatd(struct fatinfo *dtable);
+
+Прототип в     dos.h
+
+Примечания     Получает информацию  из таблицы размещения фай-
+               лов  (FAT)  для текущего  устройства.  dtable -
+               указатель на структуру типа fatinfo,  в которую
+               помещаются полученные данные. Структура fatinfo
+               определена следующим образом:
+                 struct fatinfo {
+                   char fi_sclus;   /* секторов в кластере */
+                   char fi_fatid;   /* id-байт FAT */
+                   int fi_nclus;    /* число кластеров */
+                   int fi_bysec;    /* байтов в секторе */
+                 };
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      getdfree, getfat
+
+Пример         #include <stdio.h>
+               #include <dos.h>
+               int main(void)
+               {  struct fatinfo diskinfo;
+                  /* получаем информацию
+                     о текущем устройстве */
+                  getfatd(&diskinfo);
+                  printf("\nDefault Drive:\n");
+                  printf(" sectors per cluster: %5d\n",
+                         diskinfo.fi_sclus);
+                  printf(" FAT ID byte:         %5X\n",
+                         diskinfo.fi_fatid & 0xFF);
+                  printf(" number of clusters   %5d\n",
+                         diskinfo.fi_nclus);
+                  printf(" bytes per sector     %5d\n",
+                         diskinfo.fi_bysec);
+                  return 0;
+               }
+
+     getfillpattern
+──────────────────────────────────────────────────────────────
+Функция        Копирует определенный  пользователем шаблон за-
+               полнения в память.
+
+Синтаксис      #include <graphics.h>
+               void far getfillpattern(char far *pattern);
+
+Прототип в     graphics.h
+
+Примечания     Копирует определенный  пользователем шаблон за-
+               полнения,       установленный       посредством
+               setfillpattern, в 8-байтовую область.
+               pattern  -  указатель на  эту область,  которая
+               представляет   собой  последовательность  из  8
+               байт,  где  каждый  байт соответствует 8
+               пикселам шаблона.  Если  бит  в  байте  шаблона
+               установлен  в  1,  соответствующий пиксел будет
+               нарисован.  Например, следующий шаблон, опреде-
+               ленный пользователем,  рисует пикселы в шахмат-
+               ном порядке:
+                 char checkboard[8] = {
+                   0xAA, 0x55, 0xAA, 0x55,
+                   0xAA, 0x55, 0xAA, 0x55
+                 };
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getfillsettings, setfillpattern
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int maxx, maxy;
+                  char pattern[8] = {0x00, 0x70, 0x20, 0x27,
+                                     0x25, 0x27, 0x04, 0x04};
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)   /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                             grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  maxx = getmaxx();
+                  maxy = getmaxy();
+                  setcolor(getmaxcolor());
+                  /* устанавливаем шаблон, определенный
+                     пользователем */
+                  setfillpattern(pattern, getmaxcolor());
+                  /* заполняем экран шаблоном */
+                  bar(0, 0, maxx, maxy);
+                  getch();
+                  /* получаем текущий шаблон,
+                     определенный пользователем */
+                  getfillpattern(pattern);
+                  /* модификация шаблона */
+                  pattern[4] -= 1;
+                  pattern[5] -= 3;
+                  pattern[6] += 3;
+                  pattern[7] -= 4;
+                  /* устанавливаем новый шаблон */
+                  setfillpattern(pattern, getmaxcolor());
+                  /* заполняем экран новым шаблоном */
+                  bar(0, 0, maxx, maxy);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getfillsettings
+──────────────────────────────────────────────────────────────
+Функция        Получает информацию о текущем шаблоне  и  цвете
+               заполнения.
+
+Синтаксис      #include <graphics.h>
+               void far getfillsettings
+                      (struct fillsettingstype far *fillinfo);
+
+Прототип в     graphics.h
+
+Примечания     getfillsettings   помещает  в   структуру  типа
+               fillsettingstype  информациею о текущем шаблоне
+               и цвете заполнения; fillinfo - указатель на эту
+               структуру. Структура fillsettingstype определе-
+               на в graphics.h следующим образом:
+                struct fillsettingstype {
+                  int pattern; /* текущий шаблон заполнения */
+                  int color;     /* текущий цвет заполнения */
+                };
+               Функции bar,  bar3d,  fillpoly,   floodfill   и
+               pieslice заполняют область текущим шаблоном за-
+               полнения и текущим цветом  заполнения.  Имеется
+               11 предопределенных шаблонов заполнения (напри-
+               мер,  сплошной, двойная штриховка,  точечный  и
+               т.д.). Перечисление fill_patterns, определенное
+               в graphics.h,  дает имена предопределенным шаб-
+               лонам заполнения (см. следующую таблицу). Кроме
+               того,  Вы можете  определить  свой  собственный
+               шаблон заполнения.
+               Если pattern равен 12 (USER_FILL),  это означа-
+               ет, что используется определенный пользователем
+               шаблон заполнения;  в  противном случае pattern
+               содержит номер предопределенного шаблона. Пере-
+               числение    fill_patterns,    определенное    в
+               graphics.h,  дает имена предопределенным шабло-
+               нам заполнения плюс индикатору шаблона, опреде-
+               ленного пользователем.
+               ───────────────────────────────────────────────
+                Имя         Значение   Описание
+               ───────────────────────────────────────────────
+               EMPTY_FILL        0 Заполнение фоновым цветом
+               SOLID_FILL        1 Сплошное заполнение
+               LINE_FILL         2 Заполнение ───
+               LTSLASH_FILL      3 Заполнение ///
+               SLASH_FILL        4 Заполн. ///, толстые линии
+               BKSLASH_FILL      5 Заполн. \\\, толстые линии
+               LTBKSLASH_FILL    6 Заполнение \\\
+               HATCH_FILL        7 Заполн. редкой штриховкой
+               XHATCH_FILL       8 Заполн. двойной штриховкой
+               INTERLEAVE_FILL   9 Заполн. прерывистой линией
+               WIDE_DOT_FILL    10 Заполнение редкими точками
+               CLOSE_DOT_FILL   11 Заполнение частыми точками
+               USER_FILL        12 Шаблон, определяемый польз.
+               ───────────────────────────────────────────────
+               Все шаблоны, за исключением EMPTY_FILL, исполь-
+               зуют  текущий   цвет   заполнения;   EMPTY_FILL
+               использует текущий фоновый цвет.
+
+Значение       Нет
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getfillpattern, setfillpattern, setfillstyle
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               /* наименования стилей заполнения */
+               char *fname[] = { "EMPTY_FILL", "SOLID_FILL",
+                                 "LINE_FILL", "LTSLASH_FILL",
+                                 "SLASH_FILL", "BKSLASH_FILL",
+                                 "LTBKSLASH_FILL",
+                                 "HATCH_FILL", "XHATCH_FILL",
+                                 "INTERLEAVE_FILL",
+                                 "WIDE_DOT_FILL",
+                                 "CLOSE_DOT_FILL", "USER_FILL"
+                               };
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  struct fillsettingstype fillinfo;
+                  int midx, midy;
+                  char patstr[40], colstr[40];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)   /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                             grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* получение информации о текущем
+                     шаблоне заполнения и цвете */
+                  getfillsettings(&fillinfo);
+                  /* преобразование полученной
+                     информации в строку */
+                  sprintf(patstr, "%s is the fill style.",
+                          fname[fillinfo.pattern]);
+                  sprintf(colstr, "%d is the fill color.",
+                          fillinfo.color);
+                  /* вывод информации  на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, patstr);
+                  outtextxy(midx, midy + 2 * textheight("W"),
+                            colstr);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getftime
+──────────────────────────────────────────────────────────────
+Функция        Получает дату и время модификации файла.
+
+Синтаксис      #include <io.h>
+               int getftime(int handle, struct ftime *ftimep);
+
+Прототип в     io.h
+
+Примечания     getftime извлекает  время  и  дату  модификации
+               файла   на   диске,  открытого  с  обработчиком
+               handle.  ftimep - указатель на структуру ftime,
+               в которую помещается полученная информация.
+               Структура ftime определена следующим образом:
+                  struct ftime {
+                     unsigned ft_tsec:  5;  /* пары секунд */
+                     unsigned ft_min :  6;  /* минуты  */
+                     unsigned ft_hour:  5;  /* часы  */
+                     unsigned ft_day :  5;  /* дни */
+                     unsigned ft_month: 4;  /* месяцы */
+                     unsigned ft_year:  7;  /* год - 1980 */
+                  };
+
+Значение       При успешном завершении возвращается 0.  В слу-
+               чае ошибки возвращается -1,  и глобальная пере-
+               менная  errno устанавливается в одно из следую-
+               щих значений:
+                 EINVFNC    Неверный номер функции
+                 EBADF      Неверный номер (обработчика) файла
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      open, setftime
+
+Пример         #include <stdio.h>
+               #include <io.h>
+               int main(void)
+               {  FILE *stream;
+                  struct ftime ft;
+                  if ((stream = fopen("TEST.$$$",
+                      "wt")) == NULL)
+                  {  fprintf(stderr,
+                            "Cannot open output file.\n");
+                     return 1;
+                  }
+                  getftime(fileno(stream), &ft);
+                  printf("File time: %02u:%02u:%02u\n",
+                         ft.ft_hour, ft.ft_min,
+                         ft.ft_tsec / 2);
+                  printf("File date: %02u/%02u/%04u\n",
+                         ft.ft_month, ft.ft_day,
+                         ft.ft_year + 1980);
+                  fclose(stream);
+                  return 0;
+               }
+
+     getgraphmode
+──────────────────────────────────────────────────────────────
+Функция        Возвращает текущий графический режим.
+
+Синтаксис      #include <graphics.h>
+               int far getgraphmode(void);
+
+Прототип в     graphics.h
+
+Примечания     Прежде, чем  обратиться  к  getgraphmode,  Ваша
+               программа  должна  осуществить  успешный  вызов
+               initgraph.
+               Имена предопределенных  графических режимов со-
+               держатся в перечислении graphics_mode,  опреде-
+               ленном в graphics.h. Таблица значений этого пе-
+               речисления  представлена  в  описании   функции
+               initgraph.
+
+Значение       getgraphmode возвращает    графический   режим,
+               установленный    функциями    initgraph     или
+               setgraphmode.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getmoderange, restorecrtmode, setgraphmode
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int midx, midy, mode;
+                  char numname[80], modename[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)   /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                             grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* получаем номер и наименование режима */
+                  mode = getgraphmode();
+                  sprintf(numname,
+                          "%d is the current mode number.",
+                          mode);
+                  sprintf(modename,
+                          "%s is the current graphics mode.",
+                          getmodename(mode));
+                  /* вывод информации на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, numname);
+                  outtextxy(midx, midy + 2 * textheight("W"),
+                            modename);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getimage
+──────────────────────────────────────────────────────────────
+Функция        Сохраняет в памяти битовый образ указанной  об-
+               ласти экрана.
+
+Синтаксис      #include <graphics.h>
+               void far getimage(int left, int top, int right,
+                                int bottom, void far *bitmap);
+
+Прототип в     graphics.h
+
+Примечания     getimage копирует  образ  с  экрана  в  память.
+               left,  top,  right и bottom определяют  прямоу-
+               гольную  область экрана.  bitmap - указатель на
+               область в памяти,  куда помещается битовый  об-
+               раз. Первые два слова этой области содержат ши-
+               рину и высоту прямоугольной области,  остальная
+               часть содержит собственно образ.
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      imagesize, putimage, putpixel
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               #include <alloc.h>
+               void save_screen(void far *buf[4]);
+               void restore_screen(void far *buf[4]);
+               int maxx, maxy;
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  void far *ptr[4];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)   /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                             grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  maxx = getmaxx();
+                  maxy = getmaxy();
+                  /* изображение образа на экране */
+                  rectangle(0, 0, maxx, maxy);
+                  line(0, 0, maxx, maxy);
+                  line(0, maxy, maxx, 0);
+                  /* сохранение текущего экрана */
+                  save_screen(ptr);
+                  getch();             /* пауза */
+                  cleardevice();       /* очистка экрана */
+                  /* восстановление экрана */
+                  restore_screen(ptr);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+               void save_screen(void far *buf[4])
+               {  unsigned size;
+                  int ystart = 0, yend, yincr, block;
+                  yincr = (maxy + 1) / 4;
+                  yend = yincr;
+                  /* получить размер образа в байтах */
+                  size = imagesize(0, ystart, maxx, yend);
+                  for (block = 0; block <= 3; block++) {
+                     if ((buf[block] = farmalloc(size))
+                         == NULL)
+                     {  closegraph();
+                        printf("Error: not enough heap space "
+                               "in save_screen().\n");
+                        exit(1);
+                     }
+                     getimage(0, ystart, maxx, yend,
+                              buf[block]);
+                     ystart = yend + 1;
+                     yend += yincr + 1;
+                  }
+               }
+               void restore_screen(void far *buf[4])
+               {  int ystart=0, yend, yincr, block;
+                  yincr = (maxy + 1) / 4;
+                  yend = yincr;
+                  for (block = 0; block <= 3; block++) {
+                     putimage(0, ystart,
+                              buf[block], COPY_PUT);
+                     farfree(buf[block]);
+                     ystart = yend + 1;
+                     yend += yincr + 1;
+                  }
+               }
+
+     getlinesettings
+──────────────────────────────────────────────────────────────
+Функция        Получает текущие тип, шаблон и толщину линии.
+
+Синтаксис      #include <graphics.h>
+               void far  getlinesettings
+                      (struct linesettingstype far *lineinfo);
+
+Прототип в     graphics.h
+
+Примечания
+               getlinessettings  помещает информацию о текущем
+               типе, шаблоне и толщине линии  в стpуктуpу типа
+               linesettingstype;  lineinfo - указатель  на эту
+               структуру.
+               Эта структура определена в graphics.h следующим
+               образом:
+                  struct linesettingstype {
+                     int linestyle;
+                     unsigned upattern;
+                     int thickness;
+                  };
+               linestyle определяет, линии какого типа (напри-
+               мер,  сплошная,  пунктирная,  штрих-пунктирная,
+               прерывистая) будут в  дальнейшем  изображаться.
+               Имена для типов линий содержатся в перечислении
+               line_styles,  определенном в graphics.  h:
+               ───────────────────────────────────────────────
+                Имя         Значение   Описание
+               ───────────────────────────────────────────────
+                SOLID_LINE       0     Сплошная линия
+                DOTTED_LINE      1     Пунктирная линия
+                CENTER_LINE      2     Штрих-пунктирная линия
+                DASHED_LINE      3     Прерывистая линия
+                USERBIT_LINE     4     Тип линии, определенный
+                                       пользователем
+               ───────────────────────────────────────────────
+               thickness определяет,  толстыми или нормальными
+               будут изображаемые в дальнейшем линии.
+               ───────────────────────────────────────────────
+                Имя          Значение     Описание
+               ───────────────────────────────────────────────
+                NORM_WIDTH       1        Ширина 1 пиксел
+                THICK_WIDTH      3        Ширина 3 пиксела
+               ───────────────────────────────────────────────
+               upattern - это 16-битовый шаблон,  который при-
+               меняется,    только    если   linestyle   равен
+               USERBIT_LINE (4).  В этом случае текущим цветом
+               линий  изображаются  те  и только те пикселы на
+               линии,  для которых соответствующий бит в слове
+               шаблона установлен в 1.  Например, сплошной ли-
+               нии  соответствует  значение  upattern,  равное
+               0xFFFF (изображаются все пикселы),  в то время,
+               как пунктирной линии могут соответствовать зна-
+               чения upattern,  равные 0x3333 или 0x0F0F. Если
+               при обращении к функции  setlinestyle  параметр
+               linestyle не равен USERBIT_LINE (!=4), то пара-
+               метр  upattern  игнорируется,  хотя  и   должен
+               присутствовать.
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      setlinestyle
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               /* наименования стилей линий */
+               char *lname[] = { "SOLID_LINE", "DOTTED_LINE",
+                                 "CENTER_LINE", "DASHED_LINE",
+                                 "USERBIT_LINE"
+                               };
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  struct linesettingstype lineinfo;
+                  int midx, midy;
+                  char lstyle[80], lpattern[80], lwidth[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результатов инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                             grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* получаем информацию
+                     о текущих установках линии */
+                  getlinesettings(&lineinfo);
+                  /* преобpазуем информацию в стpоки */
+                  sprintf(lstyle, "%s is the line style.",
+                          lname[lineinfo.linestyle]);
+                  sprintf(lpattern, "0x%X is the "
+                          "user-defined line pattern.",
+                          lineinfo.upattern);
+                  sprintf(lwidth, "%d is the line thickness.",
+                          lineinfo.thickness);
+                  /* вывод информации на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, lstyle);
+                  outtextxy(midx, midy + 2 * textheight("W"),
+                            lpattern);
+                  outtextxy(midx, midy + 4 * textheight("W"),
+                            lwidth);
+                  /* выход из гpафики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getmaxcolor
+──────────────────────────────────────────────────────────────
+Функция        Возвращает максимальное значение цвета, которое
+               может быть передано в функцию setcolor.
+
+Синтаксис      #include <graphics.h>
+               int far getmaxcolor(void);
+
+Прототип в     graphics.h
+
+Примечания     getmaxcolor возвращает   наибольшее  допустимое
+               значение цвета для текущего графического  драй-
+               вера  и  режима,  которое может быть передано в
+               функцию setcolor.
+               Например, для графического  адаптера  256К  EGA
+               getmaxcolor всегда возвращает число 15, что оз-
+               начает допустимость вызова функции  setcolor  с
+               любым значением от 0 до 15.
+               Для графического адаптера CGA в режиме высокого
+               разрешения   или   для   монохромного  адаптера
+               Hercules getmaxcolor возвращает значение 1.
+
+Значение       getmaxcolor возвращает   наибольшее  допустимое
+               значение цвета.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getbkcolor,        getcolor,        getpalette,
+               getpalettesize, setcolor
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int midx, midy;
+                  char colstr[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* получаем инфоpмацию о цветах
+                     и представляем ее в виде строки */
+                  sprintf(colstr,
+                          "This mode supports colors 0..%d",
+                          getmaxcolor());
+                  /* вывод информации на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, colstr);
+                  /* выход из гpафики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getmaxmode
+──────────────────────────────────────────────────────────────
+Функция        Возвращает максимальный  номер режима для теку-
+               щего драйвера.
+
+Синтаксис      #include <graphics.h>
+               int far getmaxmode(void);
+
+Прототип в     graphics.h
+
+Примечания     getmaxmode позволяет  Вам  узнать  максимальный
+               номер режима для текущего загруженного драйвера
+               непосредственно от него самого. В этом заключа-
+               ется    ее    преимущество    перед    функцией
+               getmoderange, которая работает только с драйве-
+               рами фирмы Borland.  Минимальный  номер  режима
+               равен 0.
+
+Значение       getmaxmode возвращает максимальный номер режима
+               для текущего драйвера.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getmodename, getmoderange
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int midx, midy;
+                  char modestr[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk) /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* получаем инфоpмацию о режимах и
+                     преобpазуем ее в стpоку */
+                  sprintf(modestr,
+                          "This driver supports modes 0..%d",
+                          getmaxmode());
+                  /* вывод информации на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, modestr);
+                  /* выход из гpафики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getmaxx
+──────────────────────────────────────────────────────────────
+Функция        Возвращает максимальную х-координату экрана.
+
+Синтаксис      #include <graphics.h>
+               int far getmaxx(void);
+
+Прототип в     graphics.h
+
+Примечания     getmaxx возвращает максимальное значение экран-
+               ной  координаты  по  оси  х для текущего графи-
+               ческого драйвера и режима.
+               Например, для графического адаптера CGA в режи-
+               ме  320 * 200  getmaxx  возвращает  319. Польза
+               функции  getmaxx  неоценима  пpи центрировании,
+               определении границ области экрана и т.д.
+
+Значение       getmaxx возвращает  максимальную   х-координату
+               экрана.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getmaxy, getx
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int midx, midy;
+                  char xrange[80], yrange[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* преобpазуем значения для
+                     максимального разрешения в строки */
+                  sprintf(xrange, "X values range from 0..%d",
+                          getmaxx());
+                  sprintf(yrange, "Y values range from 0..%d",
+                          getmaxy());
+                  /* вывод информации на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, xrange);
+                  outtextxy(midx, midy + textheight("W"),
+                            yrange);
+                  /* выход из гpафики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getmaxy
+──────────────────────────────────────────────────────────────
+Функция        Возвращает максимальную y-координату экрана.
+
+Синтаксис      #include <graphics.h>
+               int far getmaxy(void);
+
+Прототип в     graphics.h
+
+Примечания     getmaxy возвращает максимальное значение экран-
+               ной  координаты  по  оси  y для текущего графи-
+               ческого драйвера и режима.
+               Например, для графического адаптера CGA в режи-
+               ме  320 * 200  getmaxx  возвращает  319. Польза
+               функции  getmaxy  неоценима  пpи центрировании,
+               определении границ области экрана и т.д.
+
+Значение       getmaxy возвращает  максимальную   y-координату
+               экрана.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getmaxx, getx, gety
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int midx, midy;
+                  char xrange[80], yrange[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* преобpазуем значения для
+                     максимального разрешения в строки */
+                  sprintf(xrange, "X values range from 0..%d",
+                          getmaxx());
+                  sprintf(yrange, "Y values range from 0..%d",
+                          getmaxy());
+                  /* вывод информации на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, xrange);
+                  outtextxy(midx, midy + textheight("W"),
+                            yrange);
+                  /* выход из гpафики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getmodename
+──────────────────────────────────────────────────────────────
+Функция        Возвращает указатель на строку,  содержащую имя
+               заданного графического режима.
+
+Синтаксис      #include <graphics.h>
+               char *far getmodename(int mode_number);
+
+Прототип в     graphics.h
+
+Примечания     getmodename принимает в качестве входного пара-
+               метра номер графического  режима  и  возвращает
+               строку,   содержащую  его  имя.  Имена  режимов
+               встроены в каждый драйвер.  Возвращаемые значе-
+               ния  ("320*200 CGA P1",  "640*200 CGA"  и т.д.)
+               полезны для построения меню,  отображения  ста-
+               туса и т.д.
+
+Значение       getmodename возвращает  указатель  на  строку с
+               именем графического режима.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getmaxmode, getmoderange
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int midx, midy, mode;
+                  char numname[80], modename[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* выход с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* получаем номер и наименование режима */
+                  mode = getgraphmode();
+                  sprintf(numname,
+                          "%d is the current mode number.",
+                          mode);
+                  sprintf(modename,
+                          "%s is the current graphics mode.",
+                          getmodename(mode));
+                  /* вывод информации на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, numname);
+                  outtextxy(midx, midy + 2 * textheight("W"),
+                            modename);
+                  /* выход из гpафики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getmoderange
+──────────────────────────────────────────────────────────────
+Функция        Получает диапазон  значений режимов для данного
+               графического драйвера.
+
+Синтаксис      #include <graphics.h>
+               void far getmoderange(int graphdriver,
+                            int far *lomode, int far *himode);
+
+Прототип в     graphics.h
+
+Примечания     getmoderange получает диапазон допустимых  зна-
+               чений   режимов   для   графического   драйвера
+               graphdriver. Наименьший допустимый номер режима
+               возвращается в *lomode, наибольший - в *himode.
+               Если graphdriver специфицирует неверный  графи-
+               ческий драйвер,  то и *lomode,  и *himode уста-
+               навливаются в  -1. Если  graphdriver pавен  -1,
+               выдается диапазон режимов текущего загруженного
+               драйвера.
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getgraphmode,     getmaxmode,      getmodename,
+               initgraph, setgraphmode
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int midx, midy;
+                  int low, high;
+                  char mrange[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завеpшение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* получаем диапазон режимов для этого
+                     драйвера  */
+                  getmoderange(gdriver, &low, &high);
+                  /* преобpазуем инфоpмацию о диапазоне
+                     режимов в строку */
+                  sprintf(mrange,
+                          "This driver supports modes %d..%d",
+                          low, high);
+                  /* вывод информации на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, mrange);
+                  /* выход из гpафики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getpalette
+──────────────────────────────────────────────────────────────
+Функция        Получает информацию о текущей палитре.
+
+Синтаксис      #include <graphics.h>
+               void far getpalette
+                            (struct palettetype far *palette);
+
+Прототип в     graphics.h
+
+Примечания     getpalette помещает информацию о размере и цве-
+               тах   текущей   палитры   в    стpуктуpу   типа
+               palettetype;  palette - указатель на эту струк-
+               туру.
+               Константа MAXCOLORS  и  структура  palettetype,
+               используемые функцией getpalette,  определены в
+               graphics.h следующим образом:
+                  #define MAXCOLORS 15
+                  struct palettetype {
+                     unsigned char size;
+                     signed char colors[MAXCOLORS + 1];
+                  };
+               size содержит  количество  цветов в палитре для
+               текущих графического устройства и режима.
+               colors -  массив  из  size  байтов,  содержащий
+               действующие  номера цветов для каждого элемента
+               палитры.
+         !!!   getpalette не может быть использована с драйве-
+               ром IBM-8514.
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getbkcolor,    getcolor,     getdefaultpalette,
+               getmaxcolor, setallpalette, setpalette
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  struct palettetype pal;
+                  char psize[80], pval[20];
+                  int i, ht;
+                  int y = 10;
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk) /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch(); /* завеpшение с кодом ошибки */
+                     exit(1);
+                  }
+                  /* получаем копию палитры */
+                  getpalette(&pal);
+                  /* преобpазуем инфоpмацию
+                     о палитpе в строки */
+                  sprintf(psize, "The palette has %d "
+                          "modifiable entries.", pal.size);
+                  /* вывод информации на экран */
+                  outtextxy(0, y, psize);
+                  if (pal.size != 0) {
+                     ht = textheight("W");
+                     y += 2 * ht;
+                     outtextxy(0, y, "Here are the current "
+                               "values:");
+                     y += 2 * ht;
+                     for (i = 0; i < pal.size; i++, y += ht)
+                     {  sprintf(pval, "palette[%02d]: 0x%02X",
+                                i, pal.colors[i]);
+                        outtextxy(0, y, pval);
+                     }
+                  }
+                  /* выход из гpафики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getpalettesize
+──────────────────────────────────────────────────────────────
+Функция        Возвращает размер таблицы цветов палитры.
+
+Синтаксис      #include <graphics.h>
+               int far getpalettesize(void);
+
+Прототип в     graphics.h
+
+Примечания     getpalettesize используется   для   определения
+               числа цветов,  которые могут быть установлены в
+               текущем графическом режиме. Например, для EGA в
+               цветном режиме возвращается число 16.
+
+Значение       getpalettesize возвращает число элементов в те-
+               кущей палитре.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      setpalette, setallpalette
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main()
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int midx, midy;
+                  char psize[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завеpшение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* преобразуем информацию
+                     о размере палитры в строку */
+                  sprintf(psize, "The palette has %d "
+                          "modifiable entries.",
+                          getpalettesize());
+                  /* вывод информации на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, psize);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getpass
+──────────────────────────────────────────────────────────────
+Функция        Читает пароль.
+
+Синтаксис      #include <conio.h>
+               char *getpass(const char *prompt);
+
+Прототип в     conio.h
+
+Примечания     getpass выводит  на системную консоль подсказку
+               prompt (строку, завершаемую нуль-символом), от-
+               ключает эхо и читает пароль.  Возвращает указа-
+               тель на  строку,  завершаемую  нуль-символом  и
+               состоящую  не  более чем из восьми символов (не
+               считая нуль-символа).
+
+Значение       Возвращаемое значение  является  указателем  на
+               статическую  строку,  которая  перезаписывается
+               при каждом вызове функции.
+
+Переносимость  Эта функция доступна в системах  UNIX.  Она  не
+               совместима с Windows.
+
+См. также      getch
+
+Пример         #include <conio.h>
+               int main(void)
+               {  char *password;
+                  password = getpass("Input a password:");
+                  cprintf("The password is: %s\r\n",
+                          password);
+                  return 0;
+               }
+
+     getpid
+──────────────────────────────────────────────────────────────
+Функция        Получает идентификационный  номер процесса (ID)
+               для программы.
+
+Синтаксис      #include <process.h>
+               unsigned getpid(void);
+
+Прототип в     process.h
+
+Примечания     Идентификационный номер процесса (ID) однознач-
+               но  идентифицирует  программу.  Это понятие за-
+               имствовано из многозадачных операционных систем
+               типа UNIX,  где с каждым процессом ассоциирован
+               уникальный номер.
+
+Значение       getpid возвращает  адрес сегмента для PSP прог-
+               раммы.
+
+Переносимость  Эта функция доступна в системах  UNIX.
+
+См. также      getpsp, _psp(глобальная переменная)
+
+Пример         #include <stdio.h>
+               #include <process.h>
+               int main(void)
+               {  printf("This program's process "
+                         "identification number (PID) "
+                         "number is%X/n", getpid());
+                  printf("Note: under DOS it is "
+                         "the PSP segment\n");
+                  return 0;
+               }
+
+     getpixel
+──────────────────────────────────────────────────────────────
+Функция        Получает цвет указанного пиксела.
+
+Синтаксис      #include <graphics.h>
+               unsigned far getpixel(int x, int y);
+
+Прототип в     graphics.h
+
+Примечания     getpixel получает цвет пиксела,  расположенного
+               в точке (x, y).
+
+Значение       getpixel возвращает цвет заданного пиксела.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getimage, putpixel
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               #include <dos.h>
+               #define PIXEL_COUNT 1000
+               #define DELAY_TIME  100  /* в миллисекундах */
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int i, x, y, color, maxx, maxy,
+                      maxcolor, seed;
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk) /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  maxx = getmaxx() + 1;
+                  maxy = getmaxy() + 1;
+                  maxcolor = getmaxcolor() + 1;
+                  while (!kbhit()) {
+                     /* инициализация генератора
+                        случайных чисел */
+                     seed = random(32767);
+                     srand(seed);
+                     for (i = 0; i < PIXEL_COUNT; i++)
+                     {  x = random(maxx);
+                        y = random(maxy);
+                        color = random(maxcolor);
+                        putpixel(x, y, color);
+                     }
+                     delay(DELAY_TIME);
+                     srand(seed);
+                     for (i = 0; i < PIXEL_COUNT; i++)
+                     {  x = random(maxx);
+                        y = random(maxy);
+                        color = random(maxcolor);
+                        if (color == getpixel(x, y))
+                           putpixel(x, y, 0);
+                     }
+                  }
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getpsp
+──────────────────────────────────────────────────────────────
+Функция        Получает префикс сегмента программы (PSP).
+
+Синтаксис      #include <dos.h>
+               unsigned getpsp(void)
+
+Прототип в     dos.h
+
+Примечания     getpsp получает адрес сегмента префикса сегмен-
+               та  программы (PSP) посредством системной функ-
+               ции DOS 0х62.
+               Эта функция  имеется  только  в  DOS  3.x.  Для
+               версий DOS 2.x и  3.x  вместо  нее  может  быть
+               использована глобальная переменная _psp,  уста-
+               навливаемая во время инициализации программы.
+
+Значение       getpsp возвращает адрес сегмента PSP.
+
+Переносимость  Эта функция доступна только  в  DOS  3.x  и  не
+               доступна в более ранних версиях.
+
+См. также      getenv, _psp(глобальная переменная)
+
+Пример         #include <stdio.h>
+               #include <dos.h>
+               int main(void)
+               {  static char command[128];
+                  char far *cp;
+                  int len, i;
+                  printf("The program segment prefix is: "
+                         "%u\n", getpsp());
+                  /* _psp установлена на адрес PSP.
+                     Остаток командной строки находится
+                     со смещением 0х80 от начала PSP.
+                     Попробуем переслать аргументы этой
+                     программы. */
+                  cp = MK_FP(_psp, 0x80);
+                  len = *cp;
+                  for (i = 0; i < len; i++)
+                     command[i] = cp[i + 1];
+                  printf("Command line: %s\n", command);
+                  return 0;
+               }
+
+     gets
+──────────────────────────────────────────────────────────────
+Функция        Читает строку  из  стандартного входного потока
+               (stdin).
+
+Синтаксис      #include <stdio.h>
+               char *gets(char *s);
+
+Прототип в     stdio.h
+
+Примечания     gets вводит  из  стандартного  входного  потока
+               (stdin) последовательность символов до  символа
+               конца  строки  включительно,  формирует  из нее
+               строку и помещает ее в  *s. Завершающий  символ
+               конца  строки  заменяется на нуль-символ (/0) в
+               *s.
+               gets допускает   присутствие  некоторых  симво-
+               лов-разделителей (пробел, табуляция) в вводимой
+               строке.  Процесс  прекращается,  когда прочитан
+               символ конца строки; все предыдущие символы ко-
+               пируются в *s.
+
+Значение       При успешном завершении  gets  возвращает аргу-
+               мент s. В случае ошибки или при достижении кон-
+               ца файла возвращается NULL.
+
+Переносимость  Эта функция  доступна в системах UNIX и опреде-
+               лена в ANSI C. Она не совместима с Windows.
+
+См. также      cgets, ferror,  fgets,  fopen,  fputs,   fread,
+               getc, puts, scanf
+
+Пример         #include <stdio.h>
+               int main(void)
+               {  char string[80];
+                  printf("Input a string:");
+                  gets(string);
+                  printf("The string input was: %s\n",
+                         string);
+                  return 0;
+               }
+
+     gettext
+──────────────────────────────────────────────────────────────
+Функция        Копирует в память текст с экрана,  находящегося
+               в текстовом режиме.
+
+Синтаксис      #include <conio.h>
+               int gettext(int left, int top, int  right,
+                           int bottom, void *destin);
+
+Прототип в     conio.h
+
+Примечания     gettext  сохраняет текстовое содержимое  прямо-
+               угольной области экрана,  определенной аргумен-
+               тами left,  top, right и bottom в области памя-
+               ти,  на которую указывает destin.
+               Все экранные  координаты  являются  абсолютными
+               (не  зависящими  от текущего окна).  Координаты
+               верхнего левого угла (1,1).
+               gettext читает содержимое области экрана в  па-
+               мять  последовательно,  слева  направо и сверху
+               вниз.
+               Каждая позиция на экране занимает 2 байта в па-
+               мяти: первый байт содержит символ, второй - его
+               видеоатрибут.
+               Объем памяти,  требуемый  для прямоугольной об-
+               ласти шириной w колонок и высотой h рядов,  оп-
+               ределяется следующим образом:
+                 число байтов = (h рядов) * (w столбцов) * 2
+
+Значение       Если операция прошла успешно, возвращается 1. В
+               случае ошибки (например, если заданы недопусти-
+               мые для текущего экранного  режима  координаты)
+               возвращается 0.
+
+Переносимость  Эта функция  работает  только  с  ПЭВМ IBM PC и
+               BIOS-совместимыми. Она не совместима с Windows.
+
+См. также      movetext, puttext
+
+Пример         #include <conio.h>
+               char buffer[4096];
+               int main(void)
+               {  int i;
+                  clrscr();
+                  for (i = 0; i <= 20; i++)
+                     cprintf("Line #%d\r\n", i);
+                  gettext(1, 1, 80, 25, buffer);
+                  gotoxy(1, 25);
+                  cprintf("Press any key to clear screen...");
+                  getch();
+                  clrscr();
+                  gotoxy(1, 25);
+                  cprintf("Press any key to restore "
+                          "screen...");
+                  getch();
+                  puttext(1, 1, 80, 25, buffer);
+                  gotoxy(1, 25);
+                  cprintf("Press any key to quit...");
+                  getch();
+                  return 0;
+               }
+
+     gettextinfo
+──────────────────────────────────────────────────────────────
+Функция        Получает информацию об изображении в  текстовом
+               режиме.
+
+Синтаксис      #include <conio.h>
+               void gettextinfo(struct text_info *r);
+
+Прототип в     conio.h
+
+Примечания     gettextinfo помещает информацию о текущем текс-
+               товом изображении в структуру типа text_info; r
+               - указатель на эту структуру.
+               Структура text_info определена в conio.h следу-
+               ющим образом:
+               struct text_info {
+                unsigned char winleft;     /*левый угол окна*/
+                unsigned char wintop;    /*верхний угол окна*/
+                unsigned char  winright;  /*правый угол окна*/
+                unsigned char winbottom;  /*нижний угол окна*/
+                unsigned char attribute; /*текстовый атрибут*/
+                unsigned char normattr; /*нормальный атрибут*/
+                unsigned char currmode; /*BW40, BW80, C40,
+                                              C80, или C4350*/
+                unsigned char screenheight;  /*высота экрана*/
+                unsigned char screenwidth;   /*ширина экрана*/
+                unsigned char  curx;   /*x-координата
+                                             в текущем окне */
+                unsigned char  cury;   /*y-координата
+                                             в текущем окне */
+               };
+
+Значение       gettextinfo ничего не возвращает; r - указатель
+               на структуру,  в которой возвращается результат
+               функции.
+
+Переносимость  Эта функция  работает  только  с  ПЭВМ IBM PC и
+               совместимыми. Она не совместима с Windows.
+
+См. также      textattr, textbackground,  textcolor, textmode,
+               wherex, wherey, window
+
+Пример         #include <conio.h>
+               int main(void)
+               {  struct text_info ti;
+                  gettextinfo(&ti);
+                  cprintf("window left      %2d\r\n",ti.winleft);
+                  cprintf("window top       %2d\r\n",ti.wintop);
+                  cprintf("window right     %2d\r\n",ti.winright);
+                  cprintf("window bottom    %2d\r\n",ti.winbottom);
+                  cprintf("attribute        %2d\r\n",ti.attribute);
+                  cprintf("normal attribute %2d\r\n",ti.normattr);
+                  cprintf("current mode     %2d\r\n",ti.currmode);
+                  cprintf("screen height    %2d\r\n",ti.screenheight);
+                  cprintf("screen width     %2d\r\n",ti.screenwidth);
+                  cprintf("current x        %2d\r\n",ti.curx);
+                  cprintf("current y        %2d\r\n",ti.cury);
+                  return 0;
+                }
+
+     gettextsettings
+──────────────────────────────────────────────────────────────
+Функция        Получает информацию о текущем графическом шриф-
+               те.
+
+Синтаксис      #include <graphics.h>
+               void  far  gettextsettings
+                  (struct textsettingstype far *texttypeinfo);
+
+Прототип в     graphics.h
+
+Примечания     gettextsettings  помещает информацию  о текущем
+               шрифте, направлении, размере и выравнивании те-
+               кста   в   структуру   типа   textsettingstype;
+               texttypeinfo - указатель на эту структуру.
+               Структура texttypeinfo определена в  graphics.h
+               следующим образом:
+                  struct textsettingstype {
+                     int font;
+                     int direction;
+                     int charsize;
+                     int horiz;
+                     int vert;
+                  };
+               Эти поля описаны в функции settextstyle.
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      outtext,       outtextxy,      registerbgifont,
+               settextjustify,  settextstyle, setusercharsize,
+               textheight, textwidth
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               /* наименования шрифтов */
+               char *font[] = { "DEFAULT_FONT",
+                                "TRIPLEX_FONT", "SMALL_FONT",
+                                "SANS_SERIF_FONT",
+                                "GOTHIC_FONT"
+                              };
+               /* наименования направлений текста */
+               char *dir[] = { "HORIZ_DIR", "VERT_DIR" };
+               /* наименования типов горизонтального
+                  выравнивания текста */
+               char *hjust[] = { "LEFT_TEXT", "CENTER_TEXT",
+                                 "RIGHT_TEXT" };
+               /* наименования типов вертикального
+                  выравнивания текста */
+               char *vjust[] = { "BOTTOM_TEXT", "CENTER_TEXT",
+                                 "TOP_TEXT" };
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  struct textsettingstype textinfo;
+                  int midx, midy, ht;
+                  char fontstr[80], dirstr[80], sizestr[80];
+                  char hjuststr[80], vjuststr[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата информации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk) /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* получаем информацию о текущих текстовых
+                     установках */
+                  gettextsettings(&textinfo);
+                  /* преобразуем информацию о тексте
+                     в строки */
+                  sprintf(fontstr, "%s is the text style.",
+                          font[textinfo.font]);
+                  sprintf(dirstr, "%s is the text direction.",
+                          dir[textinfo.direction]);
+                  sprintf(sizestr, "%d is the text size.",
+                          textinfo.charsize);
+                  sprintf(hjuststr,
+                          "%s is the horizontal "
+                          "justification.",
+                          hjust[textinfo.horiz]);
+                  sprintf(vjuststr,
+                          "%s is the vertical justification.",
+                          vjust[textinfo.vert]);
+                  /* вывод информации на экран */
+                  ht = textheight("W");
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, fontstr);
+                  outtextxy(midx, midy + 2 * ht, dirstr);
+                  outtextxy(midx, midy + 4 * ht, sizestr);
+                  outtextxy(midx, midy + 6 * ht, hjuststr);
+                  outtextxy(midx, midy + 8 * ht, vjuststr);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     gettime
+──────────────────────────────────────────────────────────────
+Функция        Получает системное время.
+
+Синтаксис      #include <dos.h>
+               void gettime(struct time *timep);
+
+Прототип в     dos.h
+
+Примечания     gettime  помещает  текущее  системное  время  в
+               структуру типа  time; timep - указатель  на эту
+               структуру.
+               Структура time определена следующим образом:
+               struct time {
+                 unsigned char ti_min;  /*минуты*/
+                 unsigned char ti_hour; /*часы*/
+                 unsigned char ti_hund; /*сотые доли секунды*/
+                 unsigned char ti_sec;  /*секунды*/
+               };
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      getdate, setdate, settime, stime, time
+
+Пример         #include   <stdio.h>
+               #include   <dos.h>
+               int main(void)
+               {  struct  time t;
+                  gettime(&t);
+                  printf("The current time is: %2d:%02d:"
+                         "%02d.%02d\n", t.ti_hour, t.ti_min,
+                         t.ti_sec, t.ti_hund);
+                  return 0;
+               }
+
+     getvect
+──────────────────────────────────────────────────────────────
+Функция        Получает вектор прерывания.
+
+Синтаксис      #include <dos.h>
+               void interrupt(*getvect(int interruptno))();
+
+Прототип в     dos.h
+
+Примечания     Каждый процессор  семейства  8086  имеет  набор
+               векторов прерываний,  пронумерованных от  0  до
+               255.  4-байтное значение каждого вектора на са-
+               мом деле является адресом, по которому размеща-
+               ется функция обработки прерывания.
+               getvect читает  значение  вектора  прерывания с
+               номером interrruptno и возвращает это  значение
+               как дальний указатель на функцию обработки пре-
+               рывания.  Значение interruptno должно лежать  в
+               диапазоне от 0 до 255.
+
+Значение       getvect возвращает текущее 4-байтное  значение,
+               хранящееся   в  векторе  прерывания  с  номером
+               interruptno.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      disable, enable, getinterrupt, setvect
+
+Пример         #include <stdio.h>
+               #include <dos.h>
+               /* прототип функции обработки прерывания */
+               void interrupt get_out();
+               /* указатель на функцию обработки прерывания */
+               void interrupt (*oldfunc)();
+               int looping = 1;
+               int main(void)
+               {  puts("Press <Shift><PrtSc> to terminate");
+                  /* сохраняем предыдущее прерывание */
+                  oldfunc  = getvect(5);
+                  /* установим обработчик прерывания */
+                  setvect(5,get_out);
+                  /* ничего не делаем */
+                  while (looping);
+                  /* восстанавливаем первоначальный обработчик
+                     прерывания */
+                  setvect(5,oldfunc);
+                  puts("Success");
+                  return 0;
+               }
+               void interrupt get_out()
+               {  /* изменяем глобальную переменную, чтобы
+                  выйти из цикла */
+                  looping = 0;
+               }
+
+     getverify
+──────────────────────────────────────────────────────────────
+Функция        Возвращает состояние флага верификации DOS.
+
+Синтаксис      #include <dos.h>
+               int getverify(void);
+
+Прототип в     dos.h
+
+Примечания     getverify получает  текущее состояние флага ве-
+               рификации.
+               Флаг верификации  управляет  выводом  на  диск.
+               Если верификация отключена, правильность вывода
+               не проверяется;  если  включена - весь вывод на
+               диск проверяется на правильность выводимых дан-
+               ных.
+
+Значение       getverify возвращает  текущее  состояние  флага
+               верификации: 0 или 1.
+                  0 - верификация отключена.
+                  1 - верификация включена.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      setverify
+
+Пример         #include <stdio.h>
+               #include <dos.h>
+               int main(void)
+               {  if (getverify())
+                     printf("DOS verify flag is on\n");
+                  else
+                     printf("DOS verify flag is off\n");
+                  return 0;
+               }
+
+     getviewsettings
+──────────────────────────────────────────────────────────────
+Функция        Получает информацию о текущем окне.
+
+Синтаксис      #include <graphics.h>
+               void far getviewsettings
+                          (struct viewporttype far *viewport);
+
+Прототип в     graphics.h
+
+Примечания
+               getviewsettings  помещает информацию  о текущем
+               окне в структуру типа  viewporttype; viewport -
+               указатель на эту структуру.
+               Структура viewporttype  определена в graphics.h
+               следующим образом:
+                  struct viewporttype {
+                     int left, top, right, bottom;
+                     int clip;
+                  };
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      clearviewport, getx, gety, setviewport
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               char *clip[] = { "OFF", "ON" };
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  struct viewporttype viewinfo;
+                  int midx, midy, ht;
+                  char topstr[80], botstr[80], clipstr[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* получаем информацию о текущем окне */
+                  getviewsettings(&viewinfo);
+                  /* преобразуем информацию в строки */
+                  sprintf(topstr, "(%d, %d) is the upper "
+                          "left viewport corner.",
+                          viewinfo.left, viewinfo.top);
+                  sprintf(botstr, "(%d, %d) is the lower "
+                          "right viewport corner.",
+                          viewinfo.right, viewinfo.bottom);
+                  sprintf(clipstr, "Clipping is turned %s.",
+                          clip[viewinfo.clip]);
+                  /* вывод информации на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  ht = textheight("W");
+                  outtextxy(midx, midy, topstr);
+                  outtextxy(midx, midy + 2 * ht, botstr);
+                  outtextxy(midx, midy + 4 * ht, clipstr);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     getw
+──────────────────────────────────────────────────────────────
+Функция        Читает целое число из потока ввода-вывода.
+
+Синтаксис      #include <stdio.h>
+               int getw(FILE *stream);
+
+Прототип в     stdio.h
+
+Примечания     getw возвращает  очередное значение типа int из
+               указанного входного потока. Наличие в файле ка-
+               кого-либо  специального выравнивания не предпо-
+               лагается.  getw не должна использоваться,  если
+               поток открыт в текстовом режиме.
+
+Значение       getw возвращает  очередное значение типа int из
+               входного потока. В случае ошибки или достижения
+               конца  файла  getw возвращает EOF.  Так как EOF
+               является допустимым возвращаемым значением  для
+               getw  и  при нормальном завершении,  необходимо
+               дополнительно  использовать  функции  feof  или
+               ferror  для выявления состояния конца файла или
+               ошибки.
+
+Переносимость  Эта функция доступна в системах UNIX.
+
+См. также      putw
+
+Пример         #include <stdio.h>
+               #include <stdlib.h>
+               #define FNAME "test.$$$"
+               int main(void)
+               {  FILE *fp;
+                  int word;
+                  /* помещаем word в файл */
+                  fp = fopen(FNAME, "wb");
+                  if (fp == NULL) {
+                     printf("Error opening file %s\n", FNAME);
+                     exit(1);
+                  }
+                  word = 94;
+                  putw(word,fp);
+                  if (ferror(fp))
+                      printf("Error writing to file\n");
+                  else
+                      printf("Successful write\n");
+                  fclose(fp);
+                  /* повторное открытие файла */
+                  fp = fopen(FNAME, "rb");
+                  if (fp == NULL) {
+                     printf("Error opening file %s\n", FNAME);
+                     exit(1);
+                  }
+                  /* извлекаем слово */
+                  word = getw(fp);
+                  if (ferror(fp))
+                      printf("Error reading file\n");
+                  else
+                      printf("Successful read: word = %d\n",
+                             word);
+                  /* завершение */
+                  fclose(fp);
+                  unlink(FNAME);
+                  return 0;
+               }
+
+     getx
+──────────────────────────────────────────────────────────────
+Функция        Возвращает х-координату текущей графической по-
+               зиции.
+
+Синтаксис      #include <graphics.h>
+               int far getx(void);
+
+Прототип в     graphics.h
+
+Примечания     getx находит х-координату  текущей  графической
+               позиции относительно текущего окна.
+
+Значение       getx возвращает  значение  х-координаты текущей
+               графической позиции.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getmaxx, getmaxy, getviewsettings, gety, moveto
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  char msg[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  /* перемещаемся в центр экрана */
+                  moveto(getmaxx() / 2, getmaxy() / 2);
+                  /* создание строки сообщения */
+                  sprintf(msg, "<-(%d, %d) is the here.",
+                          getx(), gety());
+                  /* вывод сообщения на экран */
+                  outtext(msg);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     gety
+──────────────────────────────────────────────────────────────
+Функция        Возвращает y-координату текущей графической по-
+               зиции.
+
+Синтаксис      #include <graphics.h>
+               int far gety(void);
+
+Прототип в     graphics.h
+
+Примечания     gety находит y-координату  текущей  графической
+               позиции относительно текущего окна.
+
+Значение       gety возвращает  значение  y-координаты текущей
+               графической позиции.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getmaxx, getmaxy, getviewsettings, getx, moveto
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  char msg[80];
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  /* перемещаемся в центр экрана */
+                  moveto(getmaxx() / 2, getmaxy() / 2);
+                  /* создание строки сообщения */
+                  sprintf(msg, "<-(%d, %d) is the here.",
+                          getx(), gety());
+                  /* вывод сообщение на экран */
+                  outtext(msg);
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     gmtime
+──────────────────────────────────────────────────────────────
+Функция        Переводит дату и время в значение  по  Гринвичу
+               (GMT).
+
+Синтаксис      #include <time.h>
+               struct tm *gmtime(const time_t *timer);
+
+Прототип в     time.h
+
+Примечания     gmtime принимает адрес значения,  полученного с
+               помощью функции time, и возвращает указатель на
+               структуру tm, содержащую разнесенное по отдель-
+               ным полям значение  времени,  переведенное  не-
+               посредственно в GMT.
+               Глобальная переменная timezone должна содержать
+               разность в секундах между временем по  Гринвичу
+               (GMT)  и местным поясным временем (для Тихооке-
+               анского Стандартного времени,  PST,  timezone =
+               8 * 60 * 60).
+               Глобальная переменная daylight должна иметь не-
+               нулевое значение ТОЛЬКО В ТОМ СЛУЧАЕ, если дол-
+               жен  применяться  американский стандарт летнего
+               времени.
+               Структура tm определена в time.h следующим  об-
+               разом:
+                  struct tm {
+                     int tm_sec;
+                     int tm_min;
+                     int tm_hour;
+                     int tm_mday;
+                     int tm_mon;
+                     int tm_year;
+                     int tm_wday;
+                     int tm_yday;
+                     int tm_isdst;
+                  };
+               Эти величины дают:  время в 24-часовом исчисле-
+               нии,  день месяца от 1 до 31, месяц от 0 до 11,
+               день  недели   (воскресенью  соответствует  0),
+               (год - 1900), день года от 0 до 365 и флаг, ко-
+               торый не равен 0, если действует летнее время.
+
+Значение       gmtime возвращает  указатель  на  структуру tm,
+               содержащую разнесенное по отдельным полям  зна-
+               чение времени. Эта структура - статический объ-
+               ект,  поэтому она перезаписывается  при  каждом
+               вызове.
+
+Переносимость  Эта функция  доступна в системах UNIX и опреде-
+               лена в ANSI C.
+
+См. также      asctime, ctime,  ftime, localtime, stime, time,
+               tzset
+
+Пример         #include <stdio.h>
+               #include <stdlib.h>
+               #include <time.h>
+               #include <dos.h>
+               /* Тихоокеанское Стандартное время
+                  с режимом летнего времени */
+               char *tzstr = "TZ=PST8PDT";
+               int main(void)
+               {  time_t t;
+                  struct tm *gmt, *area;
+                  putenv(tzstr);
+                  tzset();
+                  t = time(NULL);
+                  area = localtime(&t);
+                  printf("Local time is: %s", asctime(area));
+                  gmt = gmtime(&t);
+                  printf("GMT is:        %s", asctime(gmt));
+                  return 0;
+               }
+
+     gotoxy
+──────────────────────────────────────────────────────────────
+Функция        Позиционирует курсор в текстовом окне.
+
+Синтаксис      #include <conio.h>
+               void gotoxy(int x,int y);
+
+Прототип в     conio.h
+
+Примечания     gotoxy помещает курсор в заданную позицию в те-
+               кущем текстовом окне.  Если задаются недопусти-
+               мые значения  координат  (например,  вызывается
+               gotoxy(40,30),  когда  нижний  правый угол окна
+               находится в позиции (35,25)),  вызов gotoxy иг-
+               норируется.
+
+Значение       Нет
+
+Переносимость  Эта функция работает только с  ПЭВМ  IBM  PC  и
+               совместимыми. Соответствующая функция имеется в
+               Turbo Pascal. Она не совместима с Windows.
+
+См. также      wherex, wherey, window
+
+Пример         #include <conio.h>
+               int main(void)
+               {  clrscr();
+                  gotoxy(35, 12);
+                  cprintf("Hello world");
+                  getch();
+                  return 0;
+               }
+
+     graphdefaults
+──────────────────────────────────────────────────────────────
+Функция        Возвращает всем графическим установкам значение
+               по умолчанию.
+
+Синтаксис      #include <graphics.h>
+               void far graphdefaults(void);
+
+Прототип в     graphics.h
+
+Примечания     graphdefaults возвращает всем графическим уста-
+               новкам значение по умолчанию:
+                 Текущее окно - весь экран.
+                 Текущая позиция курсора (0,0).
+                 Устанавливает значения  по умолчанию для:
+                 - палитры, фонового и основного цветов;
+                 - типа и шаблона заполнения;
+                 - шрифта и выравнивания текста.
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      initgraph, setgraphmode
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int maxx, maxy;
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  maxx = getmaxx();
+                  maxy = getmaxy();
+                  /* нарисуем линию с другими установками */
+                  setlinestyle(DOTTED_LINE, 0, 3);
+                  line(0, 0, maxx, maxy);
+                  outtextxy(maxx / 2, maxy / 3, "Before "
+                            "default values are restored.");
+                  getch();
+                  /* восстановим значения по умолчанию */
+                  graphdefaults();
+                  /* очистка экрана */
+                  cleardevice();
+                  /* нарисуем линию с установками
+                     по умолчанию */
+                  line(0, 0, maxx, maxy);
+                  outtextxy(maxx / 2, maxy / 3, "After "
+                            "restoring default values.");
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     grapherrormsg
+──────────────────────────────────────────────────────────────
+Функция        Возвращает указатель   на   строку,  содержащую
+               сообщение об ошибке.
+
+Синтаксис      #include <graphics.h>
+               char *far grapherrormsg(int errorcode);
+
+Прототип в     graphics.h
+
+Примечания     grapherrormsg возвращает  указатель  на строку,
+               содержащую сообщение об ошибке, соответствующее
+               коду   ошибки,   который   возвращает   функция
+               graphresult.
+               Список сообщений об ошибках и связанных с  ними
+               мнемониках  см.  в  описании  errno  в  Главе 3
+               ("Глобальные переменные").
+
+Значение       grapherrormsg возвращает  указатель  на строку,
+               содержащую сообщение об ошибке.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      graphresult
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               #define NONSENSE -50
+               int main(void)
+               {  /* Вызовем ошибку, чтобы ее обнаружить */
+                  int gdriver = NONSENSE, gmode, errorcode;
+                  /* инициализация графики */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  /* если ошибка обнаружена, то выведем
+                     соответствующее сообщение */
+                  if (errorcode != grOk) {
+                     printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  /* нарисуем линию */
+                  line(0, 0, getmaxx(), getmaxy());
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     _graphfreemem
+──────────────────────────────────────────────────────────────
+Функция        Точка пользователя  для  программы освобождения
+               графической памяти.
+
+Синтаксис      #include <graphics.h>
+               void far _graphfreemem(void far *ptr,
+                                      unsigned size);
+
+Прототип в     graphics.h
+
+Примечания     Графическая библиотека вызывает  _graphfreemem,
+               чтобы освободить память,  ранее  распределенную
+               через _graphgetmem. Вы можете управлять функци-
+               ями распределения памяти графической  библиоте-
+               ки,    определив    свою   собственную   версию
+               _graphfreemem (Вы должны объявить ее точно так,
+               как  показано  выше).  Версия  этой  процедуры,
+               используемая  по  умолчанию,  просто   вызывает
+               free.
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      _graphgetmem, setgraphbufsize
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               #include <alloc.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int midx, midy;
+                  /* очистка текстового экрана */
+                  clrscr();
+                  printf("Press any key to initialize "
+                         "graphics mode:");
+                  getch();
+                  clrscr();
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk) /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* вывод сообщения на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, "Press any key "
+                            "to exit graphics mode:");
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+               /* эта функция вызывается графическим ядром
+                  для распределения памяти */
+               void far *far _graphgetmem(unsigned size)
+               {  printf("_graphgetmem called to allocate %d "
+                         "bytes.\n", size);
+                  printf("hit any key:");
+                  getch();
+                  printf("\n");
+                  /* распределим память из дальней кучи */
+                  return farmalloc(size);
+               }
+               /* эта функция вызывается графическим ядром
+                  для освобождения памяти */
+               void far _graphfreemem(void far *ptr,
+                                      unsigned size)
+               {  printf("_graphfreemem called to free %d "
+                         "bytes.\n", size);
+                  printf("hit any key:");
+                  getch();
+                  printf("\n");
+                  /* освобождаем ptr из дальней кучи */
+                  farfree(ptr);
+               }
+
+     _graphgetmem
+──────────────────────────────────────────────────────────────
+Функция        Точка пользователя для  программы распределения
+               графической памяти.
+
+Синтаксис      #include <graphics.h>
+               void far *far _graphgetmem(unsigned size);
+
+Прототип в     graphics.h
+
+Примечания     Процедуры графической библиотеки (не  программы
+               пользователя)   обычно  вызывают  _graphgetmem,
+               чтобы распределить память для внутренних  буфе-
+               ров,  графических драйверов и наборов символов.
+               Вы можете управлять функциями распределения па-
+               мяти  графической  библиотеки,  определив  свою
+               собственную версию _graphgetmem (Вы должны объ-
+               явить ее точно так,  как показано выше). Версия
+               этой  процедуры,  используемая  по   умолчанию,
+               просто вызывает malloc.
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      _graphfreemem, initgraph, setgraphbufsize
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               #include <alloc.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  int midx, midy;
+                  /* очистка текстового экрана */
+                  clrscr();
+                  printf("Press any key to initialize "
+                         "graphics mode:");
+                  getch();
+                  clrscr();
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk) /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+                  /* вывод сообщения на экран */
+                  settextjustify(CENTER_TEXT, CENTER_TEXT);
+                  outtextxy(midx, midy, "Press any key "
+                            "to exit graphics mode:");
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+               /* эта функция вызывается графическим ядром
+                  для распределения памяти */
+               void far *far _graphgetmem(unsigned size)
+               {  printf("_graphgetmem called to allocate %d "
+                         "bytes.\n", size);
+                  printf("hit any key:");
+                  getch();
+                  printf("\n");
+                  /* распределим память из дальней кучи */
+                  return farmalloc(size);
+               }
+               /* эта функция вызывается графическим ядром
+                  для освобождения памяти */
+               void far _graphfreemem(void far *ptr,
+                                      unsigned size)
+               {  printf("_graphfreemem called to free %d "
+                         "bytes.\n", size);
+                  printf("hit any key:");
+                  getch();
+                  printf("\n");
+                  /* освобождаем ptr из дальней кучи */
+                  farfree(ptr);
+               }
+
+     graphresult
+──────────────────────────────────────────────────────────────
+Функция        Возвращает код ошибки  для  последней  неудачно
+               завершившейся графической операции.
+
+Синтаксис      #include <graphics.h>
+               int far graphresult(void);
+
+Прототип в     graphics.h
+
+Примечания     graphresult возвращает код ошибки для последней
+               графической операции,  которая выдала ошибку, и
+               устанавливает уровень ошибки в grOk.
+               Следующая таблица содержит список кодов ошибок,
+               возвращаемых функцией graphresult. Перечисление
+               graph_errors, определенное в graphics.h, связы-
+               вает с кодами ошибок  символические  константы.
+               ───────────────────────────────────────────────
+               Код    Константы      Соответствующая строка
+               ошибки graph_errors   сообщения
+               ───────────────────────────────────────────────
+                  0   grOk           No error (Нет ошибки)
+                 -1   grNoInitGraph  (BGI) graphics not
+                                     installed (use initgraph)
+                                     (Графика не установлена
+                                     (используйте initgraph))
+                 -2   grNotDetected  Graphics hardware not
+                                     detected
+                                     (Графическая аппаратура
+                                     не обнаружено)
+                 -3   grFileNotFound Device driver file not
+                                     found
+                                     (Файл драйвера устройства
+                                     не найден)
+                 -4   grInvalidDrive Invalid device driver
+                                     file
+                                     (Неверный файл драйвера
+                                     устройства)
+                 -5   grNoLoadMem    Not enough memory to load
+                                     driver
+                                     (Недостаточно памяти для
+                                     загрузки драйвера)
+                 -6   grNoScanMem    Out of memory in scan
+                                     fill
+                                     (Выход за пределы памяти
+                                     при определении области
+                                     заполнения)
+                 -7   grNoFloodMem   Out of memory in flood
+                             fill
+                                     (Выход за пределы памяти
+                                     при заполнении области)
+                 -8   grFontNotFound Font file not found
+                                     (Файл шрифта не найден)
+                 -9   grNoFontMem    Not enough memory to load
+                                     font
+                                     (Недостаточно памяти для
+                                     загрузки шрифта)
+                -10   grInvalidMode  Invalid graphics mode for
+                                     selected driver
+                                     (Недопустимый графический
+                                     режим для выбранного
+                                     драйвера)
+                -11   grError        Graphics error
+                                     (Ошибка графики)
+                -12   grIOerror      Graphics I/O error
+                                     (Ошибка ввода/вывода
+                                     графики)
+                -13   grInvalidFont  Invalid font file
+                                     (Неверный файл шрифта)
+                -14   grInvalidFontN Invalid font number
+                                     (Неверный номер шрифта)
+                -15   grInvalidDevic Invalid device number
+                                     (Неверный номер
+                                     устройства)
+                -16   grInvalidVersi Invalid version number
+                                     (Неверный номер версии)
+               ───────────────────────────────────────────────
+               Заметим, что переменная, обслуживаемая функцией
+               graphresult, сбрасывается в 0 сразу после вызо-
+               ва graphresult. Следовательно, Вы должны сохра-
+               нить значение функции во временной  переменной,
+               а затем проверить ее.
+
+Значение       graphresult возвращает   номер  текущей  ошибки
+               графики в виде целого числа в диапазоне от  -16
+               до  0;  grapherrormsg  возвращает  указатель на
+               строку,  содержащую сообщение об ошибке,  соот-
+               ветствующее этому номеру.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      detectgraph, drawpoly,   fillpoly,   floodfill,
+               grapherrormsg,       initgraph,       pieslice,
+               registerbgidriver,             registerbgifont,
+               setallpalette,      setcolor,     setfillstyle,
+               setgraphmode,     setlinestyle,     setpalette,
+               settextjustify,                   settextstyle,
+               setusercharsize,setviewport, setvisualpage
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+               int main(void)
+               {  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  /* инициализация графики
+                     и локальных переменных */
+                  initgraph(&gdriver, &gmode, "");
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)  /* ошибка */
+                  {  printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+                  /* нарисуем линию */
+                  line(0, 0, getmaxx(), getmaxy());
+                  /* выход из графики */
+                  getch();
+                  closegraph();
+                  return 0;
+               }

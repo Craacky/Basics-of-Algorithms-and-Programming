@@ -1,0 +1,88 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
+<title>Документация по Cи, C++ и Visual C++</title>
+</head>
+
+<body background="../../background/bg6.gif" link="Black" vlink="Black" topmargin=2
+leftmargin="5" bgcolor="Aqua">
+
+<p align="center"><br>
+<font face="Arial" color="Maroon"><strong><big>Включение файлов</big></strong></font></p>
+<div align="center"><center>
+
+<table width="90%" height="132" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="100%" height="132" valign="middle"><p align="left"><strong><font face="Arial"
+    color="#0080FF"><big>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Стр. 20 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </big></font><font
+    face="Arial" color="#800000"><small>&lt; <a href="../visual_docum1.htm" target="_self"
+    style="color: rgb(128,64,64)">оглавление </a>&gt;</small></font></strong><font
+    face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">Командная
+    строка для включения файлов выглядит следующим
+    образом: <strong>#include &quot;filename&quot;</strong> и указывает
+    препроцессору, что содержимое файла с именем <strong>filename
+    </strong>надо вставить в том месте программы, где
+    использованна командная строка. Эта возможность
+    препроцессора позволяет следовать в Си идеям
+    структурного программирования, согласно которым
+    большая порграмма обычно расчленяется на
+    логически завершенные части и каждая затем
+    оформляется как самостоятельная функция. &nbsp;
+    После отладки каждая из них оформляется в виде
+    отдельного файла и при необходимости включается
+    в отлаживаемую программу командой <strong>#include. </strong>Часто
+    в таких файлах содержатся макроопределения и
+    после включения их в исходный модуль
+    утверждением <strong>#include </strong>они становятся
+    доступными для всех функций. Например,
+    приведенная ниже (пример 6.5) полезные
+    макроопределения, используемые в программе
+    (пример 6.6), можно &quot;замаскировать&quot;, поместив
+    их в файл &quot;<strong>makro.h</strong>&quot;, а в начале
+    исходного файла с текстом программы поместить
+    командную строку #<strong>include &quot;makro.h&quot;.</strong></font></p>
+    <p align="left"><font face="Times New Roman" color="#000000"><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </strong>Пример 6.5</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="78%">
+      <tr>
+        <td width="100%"><strong>#include &lt;stdio.h&gt;<br>
+        #define pr(int) printf(&quot;%d&quot;,int);<br>
+        #define SKIP putchar('\n');<br>
+        #define PRINT1(X1) pr(X!);SKIP<br>
+        #define PRINT2(X1,X2) pr(X1);PRINT(X2);SKIP<br>
+        #define PRINT3(X1,X2,X3) pr(X1);PRINT(X2,X3);SKIP</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left"><font color="#000000">Команда включения
+    может иметь другую форму: <strong>#include &lt;filename&gt;. </strong>В
+    частности, все наши пограммы включали командную
+    строку <strong>#include &lt;stdio.h&gt;, </strong>благодаря которой
+    программы пользователя могут обращаться к
+    функциям, обеспечивающим стандартный ввод-вывод
+    (<strong>getchar, putchar, printf, scanf и др.)</strong> </font></p>
+    <p align="left"><font color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Пример 6.6</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="54%">
+      <tr>
+        <td width="100%"><strong>#include &lt;stdio.h&gt;<br>
+        main()<br>
+        {<br>
+        int a,b,c;<br>
+        a=5;b=7;c=a+b;<br>
+        PRINT1(a);PRINT2(a,b);PRINT3(a,b,c);<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="center"><font face="Arial" color="#804040"><small><strong>&lt; <a
+    href="book019.htm" target="_self" style="color: rgb(128,64,64)">Назад</a> &gt;
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt; <a href="book021.htm"
+    style="color: rgb(128,64,0)">Дальше</a> &gt;</strong></small></font><br>
+    </td>
+  </tr>
+</table>
+</center></div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
+<title>Документация по Cи, C++ и Visual C++</title>
+</head>
+
+<body background="../../background/bg6.gif" link="Black" vlink="Black" topmargin=2
+leftmargin="5" bgcolor="Aqua">
+
+<p align="center"><font face="Arial" color="Maroon"><strong><big>Условная
+компиляция</big></strong></font></p>
+<div align="center"><center>
+
+<table width="90%" height="132" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="100%" height="132" valign="middle"><p align="left"><strong><font face="Arial"
+    color="#0080FF"><big>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Стр. 21 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </big></font><font
+    face="Arial" color="#800000"><small>&lt; <a href="../visual_docum1.htm" target="_self"
+    style="color: rgb(128,64,64)">оглавление </a>&gt;</small></font></strong><font
+    face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">Условные
+    конструкции препроцессора позволяют
+    компилировать или пропускать часть программы в
+    зависимсти от выполнения некоторого условия.
+    Условие может принимать одну из описываемых ниже
+    форм.</font></p>
+    <p align="left"><strong><font face="Times New Roman" color="#000000">#if
+    константное_выражение</font></strong></p>
+    <p align="left"><font face="Times New Roman" color="#000000">Проверяется
+    значение выражения, составленного из констант и
+    если оно не равно нулю, компилируется
+    (включается) последующий текст.</font></p>
+    <p align="left"><strong><font face="Times New Roman" color="#000000">#ifdef
+    идентификатор</font></strong></p>
+    <p align="left"><font face="Times New Roman" color="#000000">Последующий
+    тест компилируется, если &quot;идентификатор&quot;
+    уже был опредеоен для препроцессора в команде <strong>#define.</strong></font></p>
+    <p align="left"><strong><font face="Times New Roman" color="#000000">#ifndef
+    идентификатор</font></strong></p>
+    <p align="left"><font face="Times New Roman" color="#000000">Последующий
+    текст компилируется, если &quot;идентификатор&quot; в
+    данный момент не определен. Конструкция </font></p>
+    <p align="left"><strong><font face="Times New Roman" color="#000000">#undef
+    идентификатор</font></strong></p>
+    <p align="left"><font face="Times New Roman" color="#000000">исключает
+    &quot;идентификатор&quot; из списка определенных для
+    препроцессора имен. За любой из трех условных
+    команд может следовать произвольное число строк
+    текста, содержащих, возможно, команду вида <strong>#else
+    </strong>и заканчивающихся <strong>#endif. </strong>Если
+    проверяемое условие справедливо, то строки между
+    <strong>#else </strong>и <strong>#endif </strong>игнорируются. Если же
+    проверяемое условие не выполняется, то
+    игнорируются все строки между проверкой и
+    командой <strong>#else, </strong>а если ее нет, то командой <strong>#endif.
+    </strong></font></p>
+    <p align="left"><font face="Times New Roman" color="#000000"><strong>&nbsp; </strong>Приведенная
+    на примере 6.7 программа иллюстрирует применение
+    некоторых из рассмотренных выше команд,
+    обеспечивающих условную компиляцию. </font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Пример 6.7</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="55%">
+      <tr>
+        <td width="100%"><strong>#define SIZE 16<br>
+        #include stdio.h<br>
+        main()<br>
+        {<br>
+        char c='A';<br>
+        #ifdef SIZE<br>
+        &nbsp; int x=123;<br>
+        &nbsp; printf(&quot;x=%d\n&quot;,x);<br>
+        #else <br>
+        &nbsp; static char x[SIZE]=&quot;информатика&quot;;<br>
+        &nbsp; printf(&quot;x=%s\n&quot;,x);<br>
+        #endif<br>
+        &nbsp; printf(&quot;%c\n&quot;,c);<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="center"><font face="Arial" color="#804040"><small><strong>&lt; <a
+    href="book020.htm" target="_self" style="color: rgb(128,64,64)">Назад</a> &gt;</strong></small></font>
+    <font face="Arial" color="#804040"><small><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    &lt; <a href="book022.htm" style="color: rgb(128,64,0)">Дальше</a> &gt;</strong></small></font><br>
+    </td>
+  </tr>
+</table>
+</center></div>
+</body>
+</html>

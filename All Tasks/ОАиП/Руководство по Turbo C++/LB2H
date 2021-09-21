@@ -1,0 +1,2807 @@
+     harderr
+──────────────────────────────────────────────────────────────
+Функция        Устанавливает обработчик аппаратных ошибок.
+
+Синтаксис      #include <dos.h>
+               void harderr(int(*handler)());
+
+Прототип в     dos.h
+
+Примечания     harderr устанавливает   обработчик   аппаратных
+               ошибок  для текущей программы.  Этот обработчик
+               получает управление при возникновении  прерыва-
+               ния 0х24.  (Информацию о прерываниях см.  Руко-
+               водство по DOS).
+               handler - указатель на функцию, которая вызыва-
+               ется при возникновении этого  прерывания.  Этой
+               функции передаются следующие аргументы:
+                 handler(int errval, int ax, int bp, int si);
+               errval -  это  код ошибки,  установленный DOS в
+               регистре DI;  ax,  bp,  si - значения регистров
+               AX, BP, SI соответственно, установленные DOS.
+               - ax  показывает,  была  ли  обнаружена  ошибка
+               диска или другого устройства.  Если значение ax
+               неотрицательно,  то  обнаружена  ошибка  диска;
+               иначе - ошибка другого устройства. Для дисковой
+               ошибки коньюнкция (логическое И)  ax  и  0х00FF
+               дает  номер  отказавшего  накопителя  (0  соот-
+               ветствует А, 1 соответствует В и так далее).
+               - bp и si содержат адрес заголовка драйвера от-
+               казавшего устройства. bp содержит адрес сегмен-
+               та, а si - смещение.
+               Функция handler  не вызывается непосредственно.
+               harderr  устанавливает  обработчик   прерываний
+               DOS, который и вызывает функцию.
+               Обработчик может вызывать системные функции DOS
+               от 1 до 0хС;  любой другой вызов портит DOS.  В
+               частности,нельзя использовать функции стандарт-
+               ного  ввода/вывода С или эмулятора ввода/вывода
+               UNIX.
+               Обработчик должен  возвратить 0 (игнорировать),
+               1 (повторить) или 2 (завершить).
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в DOS.  Она не сов-
+               местима с Windows.
+
+См. также      hardresume, hardretn, peek, poke
+Пример         /* Эта  программа  будет  перехватывать  ошибки
+               диска и побуждать пользователя к действию. Ста-
+               райтесь выполнять ее без диска в устройстве А:,
+               чтобы вызвать эти функции. */
+
+               #include <stdio.h>
+               #include<conio.h>
+               #include <dos.h>
+
+               #define IGNORE  0
+               #define RETRY   1
+               #define ABORT   2
+
+               int buf[500];
+
+               /* определение сообщений для перехваченных оши-
+               бок диска */
+               static char *err_msg[] = {
+                "write protect",     /* защита от записи */
+                "unknown unit",      /* неизвестный unit */
+                "drive not ready",   /* устройство не готово*/
+                "unknown command",   /* неизвестная команда */
+                "data error (CRC)",  /* ошибка данных */
+                "bad request",       /* неверный запрос */
+                "seek error",        /* ошибка поиска */
+                "unknown media type",/* неизвестный   тип
+                                        носителя */
+                "sector not found",  /* сектор не найден */
+                "printer out of paper",/* нет бумаги */
+                "write fault",         /* ошибка записи */
+                "read fault",          /* ошибка чтения */
+                "general failure",     /* общая ошибка */
+                "reserved",            /* зарезервировано */
+                "reserved",            /* зарезервировано */
+                "invalid disk change" /*неверная смена диска*/
+               };
+
+               error_win(char *msg)
+               {
+                  int retval;
+
+                  cputs(msg);
+
+               /* Предложение   пользователю  нажать  клавишу,
+               чтобы: отказаться, повторить, игнорировать */
+                  while(1)
+                  {
+                      retval= getch();
+                      if (retval == 'a' || retval == 'A')
+                      {
+                          retval = ABORT;
+                          break;
+                      }
+                      if (retval == 'r' || retval == 'R')
+                      {
+                          retval = RETRY;
+                          break;
+                      }
+                      if (retval == 'i' || retval == 'I')
+                      {
+                          retval = IGNORE;
+                          break;
+                      }
+                  }
+
+                  return(retval);
+               }
+
+               /* pragma warn -par  сокращает  предупреждения,
+               которые обнаружены из-за неиспользованных пара-
+               метров errval, bp и si в handler. */
+
+               #pragma warn -par
+
+               int handler(int errval,int ax,int bp,int si)
+               {
+                  static char msg[80];
+                  unsigned di;
+                  int drive;
+                  int errorno;
+
+                  di= _DI;
+               /* если это не ошибка диска, то это было другое
+               устройство, имеющее неисправность */
+
+                  if (ax < 0)
+                  {
+                     /* сообщение об ошибке */
+                     error_win("Device error");
+               /* и  возврат  в  программу  по прямому запросу
+               'abort'(прекратить) */
+                     hardretn(ABORT);
+                  }
+               /*  в случае ошибки диска */
+                  drive = ax & 0x00FF;
+                  errorno = di & 0x00FF;
+               /* сообщение, какая была ошибка */
+                 sprintf(msg,"Error:%s on drive %c\r\nA)bort,"
+                          "R)etry, I)gnore: ",
+                          err_msg[errorno], 'A' + drive);
+               /* возврат в  программу  через  прерывание  dos
+               0x23   по   указанию  пользователя:  прекратить
+               (abort),  повторить  (retry)  или  игнорировать
+               (ignore) */
+                  hardresume(error_win(msg));
+                  return ABORT;
+               }
+               #pragma warn +par
+
+               int main(void)
+               {
+               /* установка нашего обработчика на аппаратное
+                  прерывание */
+                  harderr(handler);
+                  clrscr();
+                  printf("Make sure there is no disk in drive"
+                         "A:\n");
+                  printf("Press any key ....\n");
+                  getch();
+                  printf("Trying to access drive A:\n");
+                  printf("fopen returned %p\n",
+                         fopen("A:temp.dat", "w"));
+                  return 0;
+               }
+
+     hardresume
+──────────────────────────────────────────────────────────────
+Функция        Аппаратный обработчик ошибок.
+
+Синтаксис      #include <dos.h>
+               void hardresume(int axret);
+
+Прототип в     dos.h
+
+Примечания     Обработчик ошибок,    установленный    функцией
+               harderr,  может вызвать hardresume для возврата
+               управления функции DOS, вызвавшей ошибку.Значе-
+               ние axret будет возвращено в  DOS.  Обычно  это
+               индикатор  для завершения (2),  повтора (1) или
+               игнорирования (0).  Завершение (abort) выполня-
+               ется  через  прерывание DOS 0х23 (прерывание по
+               Ctrl-Brk).
+               Обработчик должен возвращать 0  (игнорировать),
+               1 (повторить) или 2 (завершить).
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в DOS.  Она не сов-
+               местима с Windows.
+
+См. также      harderr, hardretn
+
+Пример         /* Эта  программа  будет  перехватывать  ошибки
+               диска и побуждать пользователя к действию. Ста-
+               райтесь выполнять ее без диска в устройстве А:,
+               чтобы вызвать эти функции. */
+
+               #include <stdio.h>
+               #include <conio.h>
+               #include <dos.h>
+
+               #define IGNORE  0
+               #define RETRY   1
+               #define ABORT   2
+
+               int buf[500];
+
+               /* определение сообщений для перехваченных оши-
+               бок диска */
+               static char *err_msg[] = {
+               "write protect",     /* защита от записи */
+               "unknown unit",      /* неизвестный unit */
+               "drive not ready",   /* устройство не готово */
+               "unknown command",   /* неизвестная команда */
+               "data error (CRC)",  /* ошибка данных */
+               "bad request",       /* неверный запрос */
+               "seek error",        /* ошибка поиска */
+               "unknown media type",  /* неизвестный   тип
+                                         носителя */
+               "sector not found",    /* сектор не найден */
+               "printer out of paper",/* нет бумаги */
+               "write fault",         /* ошибка записи */
+               "read fault",          /* ошибка чтения */
+               "general failure",     /* общая ошибка */
+               "reserved",            /* зарезервировано */
+               "reserved",            /* зарезервировано */
+               "invalid disk change" /*неверная смена диска*/
+               };
+
+               error_win(char *msg)
+               {
+                  int retval;
+
+                  cputs(msg);
+
+               /* Предложение   пользователю  нажать  клавишу,
+               чтобы: отказаться, повторить, игнорировать */
+                  while(1)
+                  {
+                      retval= getch();
+                      if (retval == 'a' || retval == 'A')
+                      {
+                          retval = ABORT;
+                          break;
+                      }
+                      if (retval == 'r' || retval == 'R')
+                      {
+                          retval = RETRY;
+                          break;
+                      }
+                      if (retval == 'i' || retval == 'I')
+                      {
+                          retval = IGNORE;
+                          break;
+                      }
+                  }
+
+                  return(retval);
+               }
+
+               /* pragma warn -par  сокращает  предупреждения,
+               которые обнаружены из-за неиспользованных пара-
+               метров errval, bp и si в handler. */
+
+               #pragma warn -par
+
+               int handler(int errval,int ax,int bp,int si)
+               {
+                  static char msg[80];
+                  unsigned di;
+                  int drive;
+                  int errorno;
+
+                  di= _DI;
+               /* если это не ошибка диска, то это было другое
+               устройство, имеющее неисправность */
+
+                  if (ax < 0)
+                  {
+                     /* сообщение об ошибке */
+                     error_win("Device error");
+               /* и  возврат  в  программу  по прямому запросу
+               'abort' (прекратить) */
+                     hardretn(ABORT);
+                  }
+               /* в случае ошибки диска */
+                  drive = ax & 0x00FF;
+                  errorno = di & 0x00FF;
+               /* сообщение: какая была ошибка */
+                 sprintf(msg,"Error:%s on drive %c\r\nA)bort,"
+                          "R)etry,I)gnore:",err_msg[errorno],
+                          'A' + drive);
+               /* возврат в  программу  через  прерывание  dos
+               0x23   по   указанию  пользователя:  прекратить
+               (abort),  повторить  (retry)  или  игнорировать
+               (ignore) */
+                  hardresume(error_win(msg));
+                  return ABORT;
+               }
+               #pragma warn +par
+
+               int main(void)
+               {
+               /* установка нашего обработчика на аппаратное
+                  прерывание */
+                  harderr(handler);
+                  clrscr();
+                  printf("Make sure there is no disk in drive"
+                         "A:\n");
+                  printf("Press any key ....\n");
+                  getch();
+                  printf("Trying to access drive A:\n");
+                  printf("fopen returned %p\n",
+                     fopen("A:temp.dat","w"));
+                  return 0;
+               }
+
+
+    hardretn
+──────────────────────────────────────────────────────────────
+Функция        Аппаратный обработчик ошибок.
+
+Синтаксис      #include <dos.h>
+               void hardretn(int retn);
+
+Прототип в     dos.h
+
+Примечания     Обработчик ошибок,    установленный    функцией
+               harderr,   может   вернуть    управление    не-
+               посредственно  в прикладную программу путем вы-
+               зова функции hardretn. Любое значение, передан-
+               ное  через retn,  будет возвращено в прикладную
+               программу.
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в DOS.  Она не сов-
+               местима с Windows.
+
+См. также      harderr, hardresume
+
+Пример
+               /* Эта  программа  будет  перехватывать  ошибки
+               диска и возвращать в программу.  Старайтесь вы-
+               полнять ее без диска  в  устройстве  А:,  чтобы
+               вызвать эти функции. */
+
+               #include <stdio.h>
+               #include <conio.h>
+               #include <dos.h>
+
+               #define IGNORE  0
+               #define RETRY   1
+               #define ABORT   2
+
+               int buf[500];
+
+               /* определение сообщений для перехваченных оши-
+               бок диска */
+               static char *err_msg[] = {
+               "write protect",     /* защита от записи */
+               "unknown unit",      /* неизвестный unit */
+               "drive not ready",   /* устройство не готово*/
+               "unknown command",   /* неизвестная команда */
+               "data error (CRC)",  /* ошибка данных */
+               "bad request",       /* неверный запрос */
+               "seek error",        /* ошибка поиска */
+               "unknown media type",/* неизвестный   тип
+                                       носителя */
+               "sector not found",  /* сектор не найден */
+               "printer out of paper",/* нет бумаги */
+               "write fault",         /* ошибка записи */
+               "read fault",          /* ошибка чтения */
+               "general failure",     /* общая ошибка */
+               "reserved",            /* зарезервировано */
+               "reserved",            /* зарезервировано */
+               "invalid disk change" /*неверная смена диска*/
+               };
+
+               void error_win(char *msg)
+               {
+                  cputs(msg);
+               }
+
+               /* pragma warn -par  сокращает  предупреждения,
+               которые обнаружены из-за неиспользованных пара-
+               метров errval, bp и si в handler. */
+               #pragma warn -par
+
+               int handler(int errval,int ax,int bp,int si)
+               {
+                  static char msg[80];
+                  unsigned di;
+                  int drive;
+                  int errorno;
+
+                  di= _DI;
+               /* если это не ошибка диска, то это было другое
+               устройство, имеющее неисправность */
+
+                  if (ax < 0)
+                  {
+                     /* сообщение об ошибке */
+                     error_win("Device error");
+               /* и возврат в  программу  по  прямому  запросу
+               'abort'(прекратить) */
+                     hardretn(ABORT);
+                  }
+               /* в случае ошибки диска */
+                  drive = ax & 0x00FF;
+                  errorno = di & 0x00FF;
+               /* сообщение: какая была ошибка */
+                  sprintf(msg,"Error: %s on drive %c\r\n",
+                          err_msg[errorno],'A'+drive);
+
+                  error_win(msg);
+               /* возврат в  программу  через  прерывание  dos
+               0x23   по   указанию  пользователя:  прекратить
+               (abort),  повторить  (retry)  или  игнорировать
+               (ignore) */
+
+               hardretn(ABORT); return ABORT;
+               }
+               #pragma warn +par
+
+               int main(void)
+               {
+                  FILE *tempfile;
+
+               /* установка нашего обработчика на аппаратное
+                  прерывание */
+                  harderr(handler);
+                  clrscr();
+                  printf("Make sure there is no disk in drive"
+                         "A:\n");
+                  printf("Press any key ....\n");
+                  getch();
+                  printf("Trying to access drive A:\n");
+                  tempfile = fopen("A:temp.dat", "w");
+                  printf("fopen returned %p\n", tempfile);
+
+                  return 0;
+               }
+
+     heapcheck
+──────────────────────────────────────────────────────────────
+Функция        Проверяет корректность кучи.
+
+Синтаксис      #include <alloc.h>
+               int heapcheck(void);
+
+Прототип в     alloc.h
+
+Примечания     heapcheck просматривает кучу  и  проверяет  для
+               каждого  блока  его размер,  указатели и другие
+               критические атрибуты.  В больших моделях памяти
+               этой функции соответствует farheapcheck.
+
+Значение       Возвращаемое значение  меньше  0  при  ошибке и
+               больше 0 при успешном завершении:
+                 _HEAPEMPTY    Куча отсутствует (1).
+                 _HEAPOK       Куча корректна (2).
+                 _HEAPCORRUPT  Куча испорчена (-1).
+
+Переносимость  Эта функция доступна только в DOS.  Она не сов-
+               местима с Windows.
+
+См. также      farheapcheck
+
+Пример         #include <stdio.h>
+               #include <alloc.h>
+
+               #define NUM_PTRS  10
+               #define NUM_BYTES 16
+
+               int main(void)
+               {
+                  char *array[ NUM_PTRS ];
+                  int i;
+
+                  for( i = 0; i < NUM_PTRS; i++ )
+                     array[ i ] = malloc( NUM_BYTES );
+
+                  for( i = 0; i < NUM_PTRS; i += 2 )
+                     free( array[ i ] );
+
+                  if( heapcheck() == _HEAPCORRUPT )
+                     printf( "Heap is corrupted.\n" );
+                  else
+                     printf( "Heap is OK.\n" );
+
+                  return 0;
+               }
+
+
+     heapcheckfree
+──────────────────────────────────────────────────────────────
+Функция        Проверяет свободные блоки  кучи  на  постоянное
+               значение.
+
+Синтаксис      #include <alloc.h>
+               int heapcheckfree(unsigned int fillvalue);
+
+Прототип в     alloc.h
+
+Значение       Возвращаемое значение меньше  0  при  ошибке  и
+               больше 0 при успешном завершении:
+                _HEAPEMPTY   Куча отсутствует (1).
+                _HEAPOK      Куча корректна (2).
+                _HEAPCORRUPT Куча испорчена (-1).
+                _BADVALUE    Значение  отлично от указанного в
+                             fillvalue (-3).
+
+Переносимость  Эта функция доступна только в DOS.  Она не сов-
+               местима с Windows.
+
+См. также      farheapcheckfree
+
+Пример         #include <stdio.h>
+               #include <alloc.h>
+               #include <mem.h>
+
+               #define NUM_PTRS  10
+               #define NUM_BYTES 16
+
+               int main(void)
+               {
+                  char *array[ NUM_PTRS ];
+                  int i;
+                  int res;
+
+                  for( i = 0; i < NUM_PTRS; i++ )
+                     array[ i ] = malloc( NUM_BYTES );
+
+                  for( i = 0; i < NUM_PTRS; i += 2 )
+                     free( array[ i ] );
+
+                  if( heapfillfree( 1 ) < 0 )
+                  {
+                     printf( "Heap corrupted.\n" );
+                     return 1;
+                  }
+
+                  for( i = 1; i < NUM_PTRS; i += 2 )
+                     memset( array[ i ], 0, NUM_BYTES );
+
+                  res = heapcheckfree( 1 );
+                  if( res < 0 )
+                     switch( res )
+                     {
+                        case _HEAPCORRUPT:
+                             printf("Heap corrupted.\n");
+                             return 1;
+                        case _BADVALUE:
+                         printf("Bad value in free space.\n");
+                         return 1;
+                        default:
+                             printf("Unknown error.\n");
+                             return 1;
+                     }
+
+                  printf("Test successful.\n");
+                  return 0;
+               }
+
+     heapchecknode
+──────────────────────────────────────────────────────────────
+Функция        Проверяет отдельный узел в куче.
+
+Синтаксис      #include <alloc.h>
+               int heapchecknode(void *node);
+
+Прототип в     alloc.h
+
+Примечания     Если узел ранее был освобожден,  то функция мо-
+               жет   вернуть   _BADNODE   вместо    ожидаемого
+               _FREEENTRY.  Это  объясняется тем,  что смежные
+               свободные блоки в куче сливаются, и запрашивае-
+               мого блока может не существовать.
+
+Значение       Возвращаемое значение  меньше  0  при  ошибке и
+               больше 0 при успешном завершении:
+                 _HEAPEMPTY    Куча отсутствует (1).
+                 _HEAPCORRUPT  Куча испорчена (-1).
+                 _BADNODE      Узел не найден (-2).
+                 _FREEENTRY    Узел свободен (3).
+                 _USEDENTRY    Узел распределен (4).
+
+Переносимость  Эта функция доступна только в DOS.  Она не сов-
+               местима с Windows.
+
+См. также      farheapchecknode
+
+Пример         #include <stdio.h>
+               #include <alloc.h>
+
+               #define NUM_PTRS  10
+               #define NUM_BYTES 16
+
+               int main(void)
+               {
+                  char *array[ NUM_PTRS ];
+                  int i;
+
+                  for( i = 0; i < NUM_PTRS; i++ )
+                     array[ i ] = malloc( NUM_BYTES );
+
+                  for( i = 0; i < NUM_PTRS; i += 2 )
+                     free( array[ i ] );
+
+                  for( i = 0; i < NUM_PTRS; i++ )
+                  {
+                     printf( "Node %2d ", i );
+                     switch( heapchecknode( array[ i ] ) )
+                     {
+                        case _HEAPEMPTY:
+                             printf( "No heap.\n" );
+                             break;
+                        case _HEAPCORRUPT:
+                             printf( "Heap corrupt.\n" );
+                             break;
+                        case _BADNODE:
+                             printf( "Bad node.\n" );
+                             break;
+                        case _FREEENTRY:
+                             printf( "Free entry.\n" );
+                             break;
+                        case _USEDENTRY:
+                             printf( "Used entry.\n" );
+                             break;
+                        default:
+                           printf( "Unknown return code.\n" );
+                            break;
+                     }
+                  }
+
+                  return 0;
+               }
+
+     heapfillfree
+──────────────────────────────────────────────────────────────
+Функция        Заполняет свободные блоки кучи постоянным  зна-
+               чением.
+
+Синтаксис      #include <alloc.h>
+               int heapfillfree(unsigned int fillvalue);
+
+Прототип в     alloc.h
+
+Значение       Возвращаемое значение меньше  0  при  ошибке  и
+               больше 0 при успешном завершении:
+                 _HEAPEMPTY    Куча отсутствует (1).
+                 _HEAPOK       Куча корректна (2).
+                 _HEAPCORRUPT  Куча испорчена (-1).
+
+Переносимость  Эта функция доступна только в DOS.  Она не сов-
+               местима с Windows.
+
+См. также      farheapfillfree
+
+Пример         #include <stdio.h>
+               #include <alloc.h>
+               #include <mem.h>
+
+               #define NUM_PTRS  10
+               #define NUM_BYTES 16
+
+               int main(void)
+               {
+                  char *array[ NUM_PTRS ];
+                  int i;
+                  int res;
+
+                  for( i = 0; i < NUM_PTRS; i++ )
+                     array[ i ] = malloc( NUM_BYTES );
+
+                  for( i = 0; i < NUM_PTRS; i += 2 )
+                     free( array[ i ] );
+
+                  if( heapfillfree( 1 ) < 0 )
+                  {
+                     printf( "Heap corrupted.\n" );
+                     return 1;
+                  }
+
+                  for( i = 1; i < NUM_PTRS; i += 2 )
+                     memset( array[ i ], 0, NUM_BYTES );
+
+                  res = heapcheckfree( 1 );
+                  if( res < 0 )
+                     switch( res )
+                     {
+                        case _HEAPCORRUPT:
+                             printf("Heap corrupted.\n");
+                             return 1;
+                        case _BADVALUE:
+                         printf("Bad value in free space.\n");
+                         return 1;
+                        default:
+                             printf("Unknown error.\n");
+                             return 1;
+                     }
+
+                  printf("Test successful.\n");
+                  return 0;
+               }
+
+     heapwalk
+──────────────────────────────────────────────────────────────
+Функция        heapwalk используется   для   последовательного
+               прохода по всем узлам кучи.
+
+Синтаксис      #include <alloc.h>
+               int heapwalk(struct heapinfo *hi);
+
+Прототип в     alloc.h
+
+Примечания     heapwalk предполагает,  что   куча   корректна.
+               Используйте  heapcheck для верификации кучи пе-
+               ред использованием  heapwalk.  При  вызове  для
+               последнего блока кучи возвращается _HEAPOK. При
+               следующем    вызове    heapwalk    возвращается
+               _HEAPEND.
+               heapwalk получает указатель на  структуру  типа
+               heapinfo  (определенную в alloc.h).  При первом
+               вызове heapwalk установите поле hi.ptr в  NULL.
+               heapwalk возвращает в этом поле адрес на первый
+               блок.  hi.size содержит размер блока в  байтах.
+               hi.in_use - это флаг,  который установлен, если
+               блок распределен.
+
+Значение       _HEAPEMPTY    Куча отсутствует (1).
+               _HEAPOK       Куча корректна (2).
+               _HEAPEND      Конец кучи (5).
+
+Переносимость  Эта функция доступна только в DOS.  Она не сов-
+               местима с Windows.
+
+См. также      farheapwalk
+
+Пример         #include <stdio.h>
+               #include <alloc.h>
+
+               #define NUM_PTRS  10
+               #define NUM_BYTES 16
+
+               int main( void )
+               {
+                  struct heapinfo hi;
+                  char *array[ NUM_PTRS ];
+                  int i;
+
+                  for( i = 0; i < NUM_PTRS; i++ )
+                     array[ i ] = malloc( NUM_BYTES );
+
+                  for( i = 0; i < NUM_PTRS; i += 2 )
+                     free( array[ i ] );
+
+                  hi.ptr = NULL;
+                  printf( "   Size   Status\n" );
+                  printf( "   ----   ------\n" );
+                  while( heapwalk( &hi ) == _HEAPOK )
+                  printf( "%7u    %s\n", hi.size,
+                         hi.in_use ? "used" : "free" );
+
+                  return 0;
+               }
+
+     highvideo
+──────────────────────────────────────────────────────────────
+Функция        Устанавливает повышенную яркость символов.
+
+Синтаксис      #include <conio.h>
+               void highvideo(void);
+
+Прототип в     conio.h
+
+Примечания     highvideo выбирает повышенную яркость  символов
+               путем установки бита повышенной яркости для те-
+               кущего цвета переднего плана.
+               Эта функция не влияет на символы, уже находящи-
+               еся  на  экране,  она влияет только на символы,
+               изображаемые  с  помощью  функций  (таких,  как
+               cprintf),  осуществляющих прямой вывод в видео-
+               память в текстовом режиме, ПОСЛЕ того, как была
+               вызвана функция highvideo.
+
+Значение       Нет.
+
+Переносимость  Эта функция работает только с  ПЭВМ  IBM  PC  и
+               совместимыми. Соответствующая функция имеется в
+               Turbo Pascal. Она не совместима с Windows.
+
+См. также      cprintf, cputs,     gettextinfo,      lowvideo,
+               normvideo, textattr, textcolor
+
+Пример         #include <conio.h>
+
+               int main(void)
+               {
+                  clrscr();
+
+                  lowvideo();
+                  cprintf("Low Intensity text\r\n");
+                  highvideo();
+                  gotoxy(1,2);
+                  cprintf("High Intensity Text\r\n");
+
+                  return 0;
+               }
+
+     hypot
+──────────────────────────────────────────────────────────────
+Функция        Вычисляет гипотенузу прямоугольного треугольни-
+               ка.
+
+Синтаксис      #include <math.h>
+               double hypot(double x, double y);
+
+Прототип в     math.h
+
+Примечания     hypot вычисляет значение z, такое, что
+                  z**2 = x**2 + y**2 и z >= 0
+               z есть длина  гипотенузы  прямоугольного  треу-
+               гольника, если x и y - длины его катетов.
+
+Значение       При успешном завершении hypot возвращает значе-
+               ние z типа double.  В случае ошибки  (например,
+               при  переполнении)  глобальная переменная errno
+               устанавливается в
+                 ERANGE  Результат вне допустимого диапазона
+               и возвращается значение HUGE_VAL.
+               Обработка ошибок для этой  функции  может  быть
+               модифицирована посредством функции matherr.
+
+Переносимость  Эта функция доступна в системах UNIX.
+
+Пример         #include <stdio.h>
+               #include <math.h>
+
+               int main(void)
+               {
+                  double result;
+                  double x = 3.0;
+                  double y = 4.0;
+
+                  result = hypot(x, y);
+                  printf("The hypotenuse is: %lf\n", result);
+
+                  return 0;
+               }
+
+     imag
+──────────────────────────────────────────────────────────────
+Функция        Возвращает мнимую часть комплексного числа.
+
+Синтаксис      #include <complex.h>
+               double imag(complex x);
+
+Прототип в     complex.h
+
+Примечания     С каждым комплексным числом связаны два числа с
+               плавающей точкой (типа double). imag возвращает
+               то из них, которое является мнимой частью.
+
+Значение       Мнимая часть комплексного числа.
+
+Переносимость  Комплексные функции требуют С++ и не  переноси-
+               мы.
+
+См. также      complex, conj, real
+
+Пример         #include <iostream.h>
+               #include <complex.h>
+
+               int main(void)
+               {
+                  double x = 3.1, y = 4.2;
+                  complex z = complex(x,y);
+                  cout << "z = " << z << "\n";
+                  cout << "  has real part="<<real(z)<<"\n";
+                  cout << "  and imaginary real part = "
+                       << imag(z) << "\n";
+                  cout << "z has complex conjugate = "
+                       << conj(z) << "\n";
+                  return 0;
+               }
+
+     imagesize
+──────────────────────────────────────────────────────────────
+Функция        Возвращает количество  байтов,  необходимое для
+               сохранения битового образа.
+
+Синтаксис      #include <graphics.h>
+               unsigned far imagesize(int left, int top,
+                                      int right, int bottom);
+
+Прототип в     graphics.h
+
+Примечания     imagesize определяет  размер  области   памяти,
+               требуемой  для  хранения битового образа.  Если
+               этот размер оказывается больше или равен  64К-1
+               байтов, imagesize возвращает 0xFFFF (-1).
+
+Значение       imagesize возвращает  размер  требуемой области
+               памяти в байтах.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      getimage, putimage
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+
+               #define ARROW_SIZE 10
+
+               void draw_arrow(int x, int y);
+
+               int main(void)
+               {
+                  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+                  void *arrow;
+                  int x, y, maxx;
+                  unsigned int size;
+
+                  /* инициализация графики и локальных
+                     переменных */
+                  initgraph(&gdriver, &gmode, "");
+
+                  /* чтение результата инициализации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk) /*обнаружена ошибка*/
+                  {
+                     printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1); /* завершение с кодом ошибки */
+                  }
+
+                  maxx = getmaxx();
+                  x = 0;
+                  y = getmaxy() / 2;
+
+                  /* вывести образ */
+                  draw_arrow(x, y);
+
+                  /* подсчитать размер образа */
+                  size = imagesize(x, y-ARROW_SIZE,
+                             x+(4*ARROW_SIZE), y+ARROW_SIZE);
+
+                  /* распределить память под образ */
+                  arrow = malloc(size);
+
+                  /* запомнить образ */
+                  getimage(x, y-ARROW_SIZE, x+(4*ARROW_SIZE),
+                           y+ARROW_SIZE, arrow);
+
+                  /* повторять до нажатия клавиши */
+                  while (!kbhit())
+                  {
+                     /* удалить старый образ */
+                     putimage(x, y-ARROW_SIZE,arrow,XOR_PUT);
+
+                     x += ARROW_SIZE;
+                     if (x >= maxx)
+                         x = 0;
+
+                     /* поместить новый образ */
+                     putimage(x, y-ARROW_SIZE,arrow,XOR_PUT);
+                  }
+
+                  /* очистить */
+                  free(arrow);
+                  closegraph();
+                  return 0;
+               }
+
+               void draw_arrow(int x, int y)
+               {
+                  /* определить область на экране */
+                  moveto(x, y);
+                  linerel(4*ARROW_SIZE, 0);
+                  linerel(-2*ARROW_SIZE, -1*ARROW_SIZE);
+                  linerel(0, 2*ARROW_SIZE);
+                  linerel(2*ARROW_SIZE, -1*ARROW_SIZE);
+               }
+
+
+     initgraph
+──────────────────────────────────────────────────────────────
+Функция        Инициализирует графическую систему.
+
+Синтаксис      #include <graphics.h>
+               void far initgraph(int far *graphdriver,
+                  int far *graphmode, char far *pathtodriver);
+
+Прототип в     graphics.h
+
+Примечания     initgraph инициализирует  графическую   систему
+               посредством  загрузки  графического  драйвера с
+               диска (или приведения в действие  зарегистриро-
+               ванного драйвера), и переводит систему в графи-
+               ческий режим.
+               Чтобы запустить графическую систему, необходимо
+               прежде всего вызвать функцию initgraph, которая
+               загрузит графический драйвер и переведет систе-
+               му в графический режим.  С помощью этой функции
+               Вы можете выбрать конкретный графический  драй-
+               вер и режим,  или потребовать автоматически оп-
+               ределить доступный во время  выполнения  графи-
+               ческий  адаптер и выбрать соответствующий драй-
+               вер.
+               В режиме автоматического обнаружения  initgraph
+               вызывает  функцию  detectgraph,  чтобы  выбрать
+               графический драйвер и режим,  затем  возвращает
+               всем  графическим  установкам (текущая позиция,
+               палитра, цвет, текущее окно и т.д.) значение по
+               умолчанию, а graphresult устанавливает в ноль.
+               Обычно при   загрузке   графического   драйвера
+               initgraph распределяет память для этого драйве-
+               ра (посредством _graphgetmem), а затем загружа-
+               ет соответствующий файл .BGI с диска. В качест-
+               ве альтернативы этой схеме динамической загруз-
+               ки можно включить файл с графическим  драйвером
+               (или  несколько таких файлов) непосредственно в
+               выполняемый файл программы на этапе  редактиро-
+               вания  связей.  Дальнейшую  информацию о BGIOBJ
+               см.  в файле UTIL.DOC (имеющемся на Ваших дист-
+               рибутивных дисках).
+               *pathtodriver содержит путь справочника,  в ко-
+               тором initgraph должна искать графические драй-
+               веры.  Если initgraph не находит их в указанном
+               справочнике,  она продолжает  поиск  в  текущем
+               справочнике.  Поэтому,  если  pathtodriver есть
+               NULL, файлы драйверов (*.BGI) должны находиться
+               в текущем справочнике. В таком же порядке функ-
+               ция  settextstyle  осуществляет  поиск   файлов
+               штриховых символьных шрифтов (*.CHR).
+               *graphdriver - это целое число, которое опреде-
+               ляет,  какой графический  драйвер  должен  быть
+               использован.  Вы  можете  задать  его значение,
+               используя    константы    перечислимого    типа
+               graphics_drivers,  определенного в graphics.h и
+               представленного в Таблице 2.3.
+               ───────────────────────────────────────────────
+Таблица 2.3     Константы типа      Числовое
+Константы       graphics_drivers    значение
+графических    ───────────────────────────────────────────────
+драйверов       DETECT              0 (запрос автообнаружения)
+                CGA                 1
+                MCGA                2
+                EGA                 3
+                EGA64               4
+                EGAMONO             5
+                IBM8514             6
+                HERCMONO            7
+                ATT400              8
+                VGA                 9
+                PC3270             10
+               ───────────────────────────────────────────────
+               *graphmode - это целое число, которое определя-
+               ет  первоначальный  графический   режим   (если
+               *graphdriver  не  равно  DETECT;  в этом случае
+               *graphmode устанавливается функцией initgraph в
+               значение,  соответствующее наивысшему для обна-
+               руженного устройства разрешению). Вы можете за-
+               дать  значение *graphmode,  используя константу
+               перечислимого типа graphics_modes, определенно-
+               го  в  graphics.h  и  представленного в Таблице
+               2.5.
+         !!!   Для *graphdriver и *graphmode должны быть зада-
+               ны  допустимые  значения  из  таблиц 2.3 и 2.5,
+               иначе Вы можете  получить  непредсказуемые  ре-
+               зультаты.     Исключением    является    случай
+               graphdriver = DETECT.
+               Обозначения палитры С0, C1, C2 и C3, используе-
+               мые в Таблице 2.5,  относятся к четырем предоп-
+               ределенным четырехцветным  палитрам,  доступным
+               на системах CGA (и совместимых). Вы можете выб-
+               рать фоновый цвет (элемент #0)  для  каждой  из
+               этих палитр,  однако остальные цвета фиксирова-
+               ны.  Эти палитры описаны более подробно в Главе
+               8  "Функции изображения" в Руководстве програм-
+               миста (в разделе "Управление цветом",  в  конце
+               главы) и представлены в Таблице 2.4.
+               ───────────────────────────────────────────────
+Таблица 2.4                        Цвет, соответствующий
+Цветовые                           значению пиксела
+палитры        ───────────────────────────────────────────────
+                Номер
+               палитры     1              2              3
+               ───────────────────────────────────────────────
+                 0     LIGHTGREEN     LIGHTRED       YELLOW
+                       (светло-      (светло-        (желтый)
+                        зеленый)      красный)
+                 1     LIGHTCYAN      LIGHTMAGENTA   WHITE
+                       (светло-       (светло-       (белый)
+                        бирюзовый)     малиновый)
+                 2     GREEN          RED            BROWN
+                       (зеленый)      (красный)   (коричневый)
+                 3     CYAN           MAGENTA        LIGHTGRAY
+                       (бирюзовый)    (малиновый)    (светло-
+                                                      серый)
+               ───────────────────────────────────────────────
+               После вызова  initgraph *graphdriver устанавли-
+               вается  в  текущий   графический   драйвер,   а
+               *graphmode - в текущий графический режим.
+
+Таблица 2.5                Графические режимы
+──────────────────────────────────────────────────────────────
+Графи-      Имя         Зна-    Разрешение   Палитра     Граф.
+ческий      конcтанты   чение   (Столбцов*               стра-
+драйвер                          *строк)                 ниц
+──────────────────────────────────────────────────────────────
+CGA         CGAC0         0     320x200      C0           1
+            CGAC1         1     320x200      С1           1
+            CGAC2         2     320x200      С2           1
+            CGAC3         3     320x200      C3           1
+            CGAHI         4     640x200      2 цвета      1
+MCGA        MCGA0         0     320х200      C0           1
+            MCGA1         1     320х200      C1           1
+            MCGA2         2     320х200      C2           1
+            MCGA3         3     320х200      C3           1
+            MCGAMED       4     640х200      2 цвета      1
+            MCGAHI        5     640х480      2 цвета      1
+EGA         EGALO         0     640х200      16 цветов    4
+            EGAHI         1     640х350      16 цветов    2
+EGA64       EGA64LO       0     640х200      16 цветов    1
+            EGA64HI       1     640х350      4 цвета      1
+EGA-MONO    EGAMONOHI     3     640х350      2 цвета      1*
+            EGAMONOHI     3     640х350      2 цвета      2**
+HERC        HERCMONOHI    0     720х348      2 цвета      2
+ATT400      ATT400C0      0     320х200      C0           1
+            ATT400C1      1     320х200      C1           1
+            ATT400C2      2     320х200      C2           1
+            ATT400C3      3     320х200      C3           1
+            ATT400MED     4     640х200      2 цвета      1
+            ATT400HI      5     640х400      2 цвета      1
+VGA         VGALO         0     640х200      16 цветов    2
+            VGAMED        1     640х350      16 цветов    2
+            VGAHI         2     640х480      16 цветов    1
+PC3270      PC3270HI      0     720х350      2 цвета      1
+IBM8514     IBM8514HI     1     1024х768     256 цветов
+            IBM8514LO     0     640х480      256 цветов
+──────────────────────────────────────────────────────────────
+               * 64К видеопамяти на плате EGAMONO
+               ** 256К видеопамяти на плате EGAMONO
+
+Значение       initgraph всегда  устанавливает  внутренний код
+               ошибки; при успешном завершении устанавливается
+               0, в случае ошибки *graphdriver устанавливается
+               в одно  из  значений  -2,  -3,  -4  или  -5,  а
+               graphresult  возвратит  то  же  самое значение,
+               смысл которого описан ниже:
+                grNotDetected     -2   Графический адаптер
+                                       не обнаружен
+                grFileNotFound    -3   Файл драйвера не найден
+                grInvalidDriver   -4   Неверный драйвер
+                grNoLoadMem       -5   Недостаточно памяти для
+                                       загрузки драйвера
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      closegraph, detectgraph,     getdefaultpalette,
+               getdrivername,    getgraphmode,   getmoderange,
+               graphdefaults,    _graphgetmem,    graphresult,
+               installuserdriver,           registerbgidriver,
+               registerbgifont,                restorecrtmode,
+               setgraphbufsize, setgraphmode
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+
+               int main(void)
+               {
+                  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode, errorcode;
+
+                  /* инициализация графического режима */
+                  initgraph(&gdriver, &gmode, "");
+
+                  /* чтение результата */
+                  errorcode = graphresult();
+
+                  if (errorcode != grOk)/*обнаружена ошибка*/
+                  {
+                     printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1);      /*возврат с кодом ошибки*/
+                  }
+
+                  /* изображение линии */
+                  line(0, 0, getmaxx(), getmaxy());
+
+                  /* очистить */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+     inport
+──────────────────────────────────────────────────────────────
+Функция        Читает слово из аппаратного порта ввода-вывода.
+
+Синтаксис      #include <dos.h>
+               int inport(int portid);
+
+Прототип в     dos.h
+
+Примечания     inport работает в точности, как команда IN про-
+               цессора 80х86. Она читает младший байт слова из
+               входного порта,  заданного в portid,  и старший
+               байт - из порта portid + 2.
+
+Значение       inport возвращает прочитанное значение.
+
+Переносимость  Эта функция доступна только для процессоров се-
+               мейства 8086.
+
+См. также      inportb, outport, outportb
+
+Пример         #include <stdio.h>
+               #include <dos.h>
+
+               int main(void)
+               {
+                  int result;
+                  int port = 0;  /* последовательный порт 0 */
+
+                  result = inport(port);
+                  printf("Word read from port %d = 0x%X\n",
+                    port, result);
+                  return 0;
+               }
+
+     inportb
+──────────────────────────────────────────────────────────────
+Функция        Читает байт из аппаратного порта ввода-вывода.
+
+Синтаксис      #include <dos.h>
+               unsigned char inportb(int portid);
+
+Прототип в     dos.h
+
+Примечания     inportb -  это  макрос,  который  читает байт с
+               входного порта, заданного в portid.
+               Вызов inportb, когда включен dos.h, интерпрети-
+               руется   как   макрос,  который  расширяется  в
+               inline-код.  Когда dos.h не  включен,  или  при
+               включенном     dos.h     выполнена    директива
+               #undef inportb,  будет осуществлен вызов  функ-
+               ции.
+
+Значение       inportb возвращает прочитанное значение.
+
+Переносимость  Эта функция доступна только для процессоров се-
+               мейства 8086.
+
+См. также      inport, outport, outportb
+
+Пример         #include <stdio.h>
+               #include <dos.h>
+
+               int main(void)
+               {
+                  unsigned char result;
+                  int port = 0; /* последовательный порт 1 */
+
+                  result = inportb(port);
+                  printf("Byte read from port %d = 0x%X\n",
+                          port, result);
+                  return 0;
+               }
+
+     insline
+──────────────────────────────────────────────────────────────
+Функция        Вставляет пустую строку в текстовом окне.
+
+Синтаксис      #include <conio.h>
+               void insline(void);
+
+Прототип в     conio.h
+
+Примечания     insline вставляет пустую строку в текстовом ок-
+               не в позиции курсора,  используя  текущий  цвет
+               фона для текста.  Все строки, которые находятся
+               ниже, сдвигаются на одну строку вниз, а послед-
+               няя строка сдвигается за пределы окна.
+               Эта функция используется в текстовом режиме.
+
+Значение       Нет.
+
+Переносимость  Эта функция работает только с  ПЭВМ  IBM  PC  и
+               совместимыми. Соответствующая функция имеется в
+               Turbo Pascal. Она не совместима с Windows.
+
+См. также      clreol, delline, window
+
+Пример         #include <conio.h>
+
+               int main(void)
+               {
+                  clrscr();
+                  cprintf("INSLINE inserts an empty line "
+                          "in the text window\r\n");
+                  cprintf("at the cursor position using the "
+                          "current text\r\n");
+                  cprintf("background color.  All lines below"
+                          "the empty one\r\n");
+                  cprintf("move down one line and the bottom "
+                          "line scrolls\r\n");
+                  cprintf("off the bottom of the window.\r\n");
+                  cprintf("\r\nPress any key to continue:");
+                  gotoxy(1, 3);
+                  getch();
+                  insline();
+                  getch();
+                  return 0;
+               }
+
+     installuserdriver
+──────────────────────────────────────────────────────────────
+Функция        Включает драйвер устройства, поставляемый изго-
+               товителем, в таблицу драйверов устройств BGI.
+
+Синтаксис      #include <graphics.h>
+               int far installuserdriver(char far *name,
+                                     int huge(*detect)(void));
+
+Прототип в     graphics.h
+
+Примечания     installuserdriver позволяет   добавить  драйвер
+               устройства,  поставляемый   изготовителем,   во
+               внутреннюю  таблицу  BGI.  Параметр *name - это
+               имя файла (.BGI) нового драйвера устройства,  а
+               параметр detect - это указатель на необязатель-
+               ную функцию автообнаружения, которая может соп-
+               ровождать  новый драйвер.  Эта функция не имеет
+               параметров и возвращает целое значение.
+               Существуют два  способа использования драйвера,
+               поставляемого изготовителем. Допустим, Вы имее-
+               те  новую  графическую  плату  Spiffy  Graphics
+               Array (SGA) - Великолепную Графическую Систему,
+               и  изготовитель  этой  платы  обеспечил Вас BGI
+               драйвером  (SGA.BGI).  Самый   простой   способ
+               использовать  этот  драйвер  - установить его с
+               помощью функции installuserdriver, а возвращен-
+               ное значение (присвоенный драйверу номер) пере-
+               дать непосредственно функции initgraph.
+               Другой, более общий способ использования  этого
+               драйвера - это присоединить на этапе редактиро-
+               вания связей функцию  автообнаружения,  которая
+               будет  вызвана  функцией  initgraph  в качестве
+               части своей логики автообнаружения (мы  полага-
+               ем,  что  изготовитель  SGA  снабдил  Вас такой
+               функцией). Когда Вы устанавливаете драйвер (вы-
+               зовом  installuserdriver),  Вы  передаете адрес
+               этой функции вместе  с  именем  файла  драйвера
+               устройства.
+               После того,  как  Вы  установили  драйвер  уст-
+               ройства и функцию автообнаружения для SGA,  вы-
+               зовите  initgraph,  чтобы  был выполнен обычный
+               процесс автообнаружения. Перед тем, как вызвать
+               встроенную        функцию       автообнаружения
+               (detectgraph),  initgraph вызовет функцию авто-
+               обнаружения SGA.  Если она не обнаружит аппара-
+               туру SGA,  она вернет значение -11 (grError), и
+               initgraph  продолжит  выполнение  своей обычной
+               логики автообнаружения (которая может  включить
+               вызов  каких-либо  других функций автообнаруже-
+               ния, поставляемых изготовителем, в том порядке,
+               в котором они были установлены).  Если же функ-
+               ция автообнаружения определит наличие SGA,  она
+               возвратит неотрицательное значение номера режи-
+               ма;  тогда initgraph отыщет и загрузит SGA.BGI,
+               установит по умолчанию рекомендованный функцией
+               автообнаружения графический режим  и,  наконец,
+               вернет управление в Вашу программу.
+               Вы можете  установить  до 10 драйверов одновре-
+               менно.
+
+Значение       installuserdriver возвращает   номер  драйвера,
+               который Вы должны передать в  initgraph,  чтобы
+               выбрать вновь установленный драйвер вручную.
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      initgraph, registerbgidriver
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+
+               /* прототипы функции */
+               int huge detectEGA(void);
+               void checkerrors(void);
+
+               int main(void)
+               {
+                  int gdriver, gmode;
+
+               /*установка драйвера устройства пользователем*/
+               gdriver = installuserdriver("EGA", detectEGA);
+
+               /* использование  программы автообнаружения */
+               gdriver = DETECT;
+
+               /* проверка ошибок установки */
+               checkerrors();
+
+               /*инициализация графики и локальных переменных*/
+               initgraph(&gdriver, &gmode, "");
+
+                  /* проверка ошибок */
+                  checkerrors();
+
+                  /* изображение линии */
+                  line(0, 0, getmaxx(), getmaxy());
+
+                  /* очистить */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+               /* обнаружена плата EGA или VGA  */
+               int huge detectEGA(void)
+               {
+                  int driver, mode, sugmode = 0;
+
+                  detectgraph(&driver, &mode);
+                  if ((driver == EGA) || (driver == VGA))
+                     /* вернуть номер предложенного режима */
+                     return sugmode;
+                  else
+                     /* вернуть код ошибки */
+                     return grError;
+               }
+
+               /* проверка  и  сообщение  о  какой-либо графи-
+               ческой ошибке */
+               void checkerrors(void)
+               {
+                  int errorcode;
+
+               /* чтение результата последней графической опе-
+               рации */
+                  errorcode = graphresult();
+                  if (errorcode != grOk)
+                  {
+                     printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1);
+                  }
+               }
+
+     installuserfont
+──────────────────────────────────────────────────────────────
+Функция        Загружает файл шрифта (.CHR), который не встро-
+               ен в BGI систему.
+
+Синтаксис      #include <graphics.h>
+               int far installuserfont(char far *name);
+
+Прототип в     graphics.h
+
+Примечания     Параметр *name - это путь к файлу,  содержащему
+               штриховый шрифт.  Одновременно можно установить
+               до 20 шрифтов.
+
+Значение       Функция installuserfont   возвращает   ID-номер
+               шрифта,  который  затем  может  быть  передан в
+               функцию settextstyle для выбора соответствующе-
+               го шрифта.  Если внутренняя таблица шрифтов уже
+               заполнена, возвращается значение -11 (grError).
+
+Переносимость  Эта функция доступна только в Borland C++.  Она
+               работает  только  с ПЭВМ IBM PC и совместимыми,
+               оснащенными дисплеем с  графическим  адаптером.
+               Эта функция не совместима с Windows.
+
+См. также      settextstyle
+
+Пример         #include <graphics.h>
+               #include <stdlib.h>
+               #include <stdio.h>
+               #include <conio.h>
+
+               /* прототипы функции */
+               void checkerrors(void);
+
+               int main(void)
+               {
+                  /* запрос автообнаружения */
+                  int gdriver = DETECT, gmode;
+                  int userfont;
+                  int midx, midy;
+
+            /* инициализация графики и локальных переменных*/
+                  initgraph(&gdriver, &gmode, "");
+
+                  midx = getmaxx() / 2;
+                  midy = getmaxy() / 2;
+
+                  /* проверка ошибок инициализации */
+                  checkerrors();
+
+               /* установка файла шрифта,  определенного поль-
+               зователем */
+                  userfont = installuserfont("USER.CHR");
+
+                  /* проверка ошибок установки */
+                  checkerrors();
+
+                  /* выбор пользовательского шрифта */
+                  settextstyle(userfont, HORIZ_DIR, 4);
+
+                  /* вывод некоторого текста */
+                  outtextxy(midx, midy, "Testing!");
+
+                  /* очистить */
+                  getch();
+                  closegraph();
+                  return 0;
+               }
+
+               /* проверка и  сообщение  о  какой-либо  графи-
+               ческой ошибке */
+               void checkerrors(void)
+               {
+                  int errorcode;
+
+               /*чтение результата последней графической  опе-
+               рации*/
+                  errorcode = graphresult();
+                  if (errorcode != grOk)
+                  {
+                     printf("Graphics error: %s\n",
+                            grapherrormsg(errorcode));
+                     printf("Press any key to halt:");
+                     getch();
+                     exit(1);
+                  }
+                }
+
+     int86
+──────────────────────────────────────────────────────────────
+Функция        Общий интерфейс с программными прерываниями се-
+               мейства 8086.
+
+Синтаксис      #include <dos.h>
+               int int86(int intno, union REGS *inregs,
+                                    union REGS *outregs);
+
+Прототип в     dos.h
+
+Примечания     int86 выполняет   программное   прерывание  се-
+               мейства 8086,  заданное в intno. Перед выполне-
+               нием  прерывания int86 помещает в регистры зна-
+               чения из *inregs.
+               После возврата из прерывания функция int86  по-
+               мещает  текущие  значения регистров в *outregs,
+               помещает  состояние  флага  переноса   в   поле
+               x.cflag в *outregs и помещает значение регистра
+               флагов 8086 в поле  x.flags  в  *outregs.  Если
+               флаг переноса установлен,  это обычно говорит о
+               том,  что обнаружена ошибка.
+               inregs и  outregs  могут указывать на одну и ту
+               же структуру.
+
+Значение       int86 возвращает  значение  регистра  АХ  после
+               возврата из программного прерывания.  Если флаг
+               переноса установлен (outregs -> x.cflag !=  0),
+               указывая на ошибку,  функция устанавливает гло-
+               бальную переменную _doserrno  в  значение  кода
+               ошибки.
+
+Переносимость  Эта функция доступна только для процессоров се-
+               мейства 8086.
+
+См. также      bdos, bdosptr,  geninterrupt,  int86x,  intdos,
+               intdosx, intr
+
+Пример         #include <stdio.h>
+               #include <conio.h>
+               #include <dos.h>
+
+               #define VIDEO 0x10
+
+               void movetoxy(int x, int y)
+               {
+                  union REGS regs;
+
+                  regs.h.ah = 2;/*установить позицию курсора*/
+                  regs.h.dh = y;
+                  regs.h.dl = x;
+                  regs.h.bh = 0;  /* видеостраница 0 */
+                  int86(VIDEO, &regs, &regs);
+               }
+
+               int main(void)
+               {
+                  clrscr();
+                  movetoxy(35, 10);
+                  printf("Hello\n");
+                  return 0;
+               }
+
+     int86x
+──────────────────────────────────────────────────────────────
+Функция        Общий интерфейс с программными прерываниями се-
+               мейства 8086.
+
+Синтаксис      #include <dos.h>
+               int int86x(int intno, union REGS *inregs,
+                                     union REGS *outregs,
+                                     struct SREGS *segregs);
+
+Прототип в     dos.h
+
+Примечания     int86x выполняет   программное  прерывание  се-
+               мейства 8086,  заданное в intno. Перед выполне-
+               нием прерывания int86x помещает в регистры зна-
+               чения из *inregs.
+               Кроме того, перед выполнением программного пре-
+               рывания   int86x    копирует   значения   полей
+               segregs -> ds и segregs -> es в соответствующие
+               регистры.  Это  позволяет  программам,  которые
+               используют дальние указатели или большие модели
+               памяти, установить, какой сегмент будет исполь-
+               зован для программного прерывания.
+               После возврата из прерывания функция int86x по-
+               мещает  текущие  значения регистров в *outregs,
+               помещает  состояние  флага  переноса   в   поле
+               x.cflag в *outregs и помещает значение регистра
+               флагов 8086 в поле x.flags  в  *outregs.
+               Кроме того, int86x восстанавливает DS и помеща-
+               ет в поля segregs -> es и segregs -> ds  значе-
+               ния  соответствующих регистров сегментов.  Если
+               флаг переноса установлен,  это обычно говорит о
+               том, что обнаружена ошибка.
+               int86x позволяет Вам вызвать программное преры-
+               вание, которое получает значение DS, отличающе-
+               еся от текущего сегмента данных, и/или получает
+               аргумент в ES.
+               inregs и outregs могут указывать на одну  и  ту
+               же структуру.
+
+Значение       int86x возвращает  значение  регистра  АХ после
+               возврата из программного прерывания.  Если флаг
+               переноса  установлен (outregs -> x.cflag != 0),
+               указывая на ошибку,  функция устанавливает гло-
+               бальную  переменную  _doserrno  в значение кода
+               ошибки.
+
+Переносимость  Эта функция доступна только для процессоров се-
+               мейства 8086.
+
+См. также      bdos, bdosptr,  geninterrupt,  intdos, intdosx,
+               int86, intr, segread
+
+Пример         #include <dos.h>
+               #include <process.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char filename[80];
+                  union REGS inregs, outregs;
+                  struct SREGS segregs;
+
+                  printf("Enter filename: ");
+                  gets(filename);
+                  inregs.h.ah = 0x43;
+                  inregs.h.al = 0x21;
+                  inregs.x.dx = FP_OFF(filename);
+                  segregs.ds = FP_SEG(filename);
+                  int86x(0x21, &inregs, &outregs, &segregs);
+                  printf("File attribute: %X\n", outregs.x.cx);
+                  return 0;
+               }
+
+     intdos
+──────────────────────────────────────────────────────────────
+Функция        Общий интерфейс с системным прерыванием DOS.
+
+Синтаксис      #include <dos.h>
+               int intdos(union REGS *inregs,
+                          union REGS *outregs);
+
+Прототип в     dos.h
+
+Примечания     intdos выполняет прерывание 0х21, чтобы вызвать
+               определенную     функцию.     Значение     поля
+               inregs -> h.ah определяет функцию DOS,  которая
+               должна быть вызвана.
+               После возврата  из  прерывания   0x21   функция
+               intdos  помещает  текущие  значения регистров в
+               *outregs,  помещает состояние флага переноса  в
+               поле x.cflag в *outregs и помещает значение ре-
+               гистра флагов 8086 в поле x.flags  в  *outregs.
+               Если флаг переноса установлен, это обычно гово-
+               рит о том,  что  обнаружена  ошибка.
+               inregs и outregs могут указывать на одну  и  ту
+               же структуру.
+
+Значение       intdos возвращает значение  регистра  АХ  после
+               завершения  функции  DOS.  Если  флаг  переноса
+               установлен (outregs -> x.cflag != 0),  указывая
+               на ошибку, функция устанавливает глобальную пе-
+               ременную _doserrno в значение кода ошибки.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      bdos, bdosptr,  geninterrupt,  int86,   int86x,
+               intdosx, intr
+
+Пример         #include <stdio.h>
+               #include <dos.h>
+
+               /* удаляет имя файла;  возвращает  0  в  случае
+               успеха, не ноль при ошибке */
+               int delete_file(char near *filename)
+               {
+                  union REGS regs;
+                  int ret;
+                  regs.h.ah = 0x41;         /* delete file */
+                  regs.x.dx = (unsigned) filename;
+                  ret = intdos(&regs, &regs);
+
+            /* если флаг переноса установлен - была ошибка */
+                  return(regs.x.cflag ? ret : 0);
+               }
+
+               int main(void)
+               {
+                  int err;
+                  err = delete_file("NOTEXIST.$$$");
+                  if (!err)
+                     printf("Able to delete NOTEXIST.$$$");
+                  else
+                  printf("Not Able to delete NOTEXIST.$$$\n");
+                  return 0;
+               }
+
+     intdosx
+──────────────────────────────────────────────────────────────
+Функция        Общий интерфейс с системным прерыванием DOS.
+
+Синтаксис      #include <dos.h>
+               int intdosx(union REGS *inregs,
+                           union REGS *outregs,
+                           struct SREGS *segregs);
+
+Прототип в     dos.h
+
+Примечания     intdosx выполняет  прерывание 0х21,  чтобы выз-
+               вать   определенную   функцию.   Значение  поля
+               inregs -> h.ah определяет функцию DOS,  которая
+               должна быть вызвана.
+               Кроме того,  перед вызовом функции DOS  intdosx
+               копирует   значения   полей   segregs -> ds   и
+               segregs -> es в соответствующие  регистры.  Это
+               позволяет программам,  которые используют даль-
+               ние указатели или большие модели памяти,  уста-
+               новить, какой сегмент будет использован для вы-
+               полнения функции.
+               После возврата  из  прерывания   0x21   функция
+               intdosx помещает  текущие  значения регистров в
+               *outregs,  помещает состояние флага переноса  в
+               поле x.cflag в *outregs и помещает значение ре-
+               гистра флагов 8086 в поле x.flags  в  *outregs.
+               Кроме того,    intdosx    помещает    в    поля
+               segregs -> es и segregs ->  ds  значения  соот-
+               ветствующих   регистров   сегментов,   а  затем
+               восстанавливает DS. Если флаг переноса установ-
+               лен,  это обычно говорит о том,  что обнаружена
+               ошибка.
+               intdosx позволяет Вам вызвать функцию DOS,  ко-
+               торая получает значение DS, отличающееся от те-
+               кущего сегмента данных, и/или получает аргумент
+               в ES.
+               inregs и outregs могут указывать на одну  и  ту
+               же структуру.
+
+Значение       intdosx возвращает  значение  регистра АХ после
+               завершения  функции  DOS.  Если  флаг  переноса
+               установлен (outregs -> x.cflag != 0),  указывая
+               на ошибку, функция устанавливает глобальную пе-
+               ременную _doserrno в значение кода ошибки.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      bdos, bdosptr,   geninterrupt,  int86,  int86x,
+               intdos, intr, segread
+
+Пример         #include <stdio.h>
+               #include <dos.h>
+
+               /* удаляет  имя  файла;  возвращает  0 в случае
+               успеха, не ноль при ошибке */
+               int delete_file(char far *filename)
+               {
+                  union REGS regs; struct SREGS sregs;
+                  int ret;
+                  regs.h.ah = 0x41;       /* удаление файла */
+                  regs.x.dx = FP_OFF(filename);
+                  sregs.ds = FP_SEG(filename);
+                  ret = intdosx(&regs, &regs, &sregs);
+
+             /* если флаг переноса установлен - была ошибка */
+                  return(regs.x.cflag ? ret : 0);
+               }
+
+               int main(void)
+               {
+                  int err;
+                  err = delete_file("NOTEXIST.$$$");
+                  if (!err)
+                     printf("Able to delete NOTEXIST.$$$\n");
+                  else
+                   printf("Not Able to delete NOTEXIST.$$$\n");
+                  return 0;
+               }
+
+     intr
+──────────────────────────────────────────────────────────────
+Функция        Альтернативный интерфейс  с программными преры-
+               ваниями семейства 8086.
+
+Синтаксис      #include <dos.h>
+               void intr(int intno, struct REGPACK *preg);
+
+Прототип в     dos.h
+
+Примечания     Функция intr   является  альтернативным  интер-
+               фейсом для выполнения  программных  прерываний.
+               Она  генерирует прерывание семейства 8086,  за-
+               данное в intno.
+               Перед выполнением  программного прерывания intr
+               помещает в регистры значения из структуры *preg
+               типа REGPACK. После возврата из прерывания intr
+               помещает текущие  значения  регистров,  включая
+               флаги, в *preg.
+               Аргументы функции intr:
+                 intno   Номер прерывания, которое должно быть
+                         выполнено
+                 preg    Адрес структуры, содержащей:
+                         (а) значения регистров перед прерыва-
+                             нием
+                         (б) значения регистров после прерыва-
+                             ния
+               Структура REGPACK  (определенная в dos.h) имеет
+               следующий формат:
+                  struct REGPACK {
+                     unsigned r_ax, r_bx, r_cx, r_dx;
+                     unsigned r_bp, r_si, r_di, r_es, r_flags;
+                  };
+
+Значение       Никакого значения не возвращается.  В *preg со-
+               держатся значения регистров после  возврата  из
+               прерывания.
+
+Переносимость  Эта функция доступна только для процессоров се-
+               мейства 8086.
+
+См. также      geninterrupt, int86, int86x, intdos, intdosx
+
+Пример         #include <stdio.h>
+               #include <string.h>
+               #include <dir.h>
+               #include <dos.h>
+
+               #define CF 1  /* Carry flag */
+
+               int main(void)
+               {
+                  char directory[80];
+                  struct REGPACK reg;
+
+                  printf("Enter directory to change to: ");
+                  gets(directory);
+                  reg.r_ax = 0x3B << 8;   /* сдвиг 3Bh в AH */
+                  reg.r_dx = FP_OFF(directory);
+                  reg.r_ds = FP_SEG(directory);
+                  intr(0x21, &reg);
+                  if (reg.r_flags & CF)
+                     printf("Directory change failed\n");
+                  getcwd(directory, 80);
+                  printf("The current directory is: %s\n",
+                         directory);
+                  return 0;
+               }
+
+     ioctl
+──────────────────────────────────────────────────────────────
+Функция        Управляет устройством ввода/вывода.
+
+Синтаксис      #include <io.h>
+               int ioctl(int handle, int func
+                         [, void *argdx, int *argcx]);
+
+Прототип в     io.h
+
+Примечания     Функция обеспечивает прямой интерфейс с систем-
+               ной функцией DOS 0x44 (IOCTL).
+               Действие функции  зависит от значения параметра
+               func, которое может быть следующим:
+                  0   Получить информацию об устройстве
+                  1   Установить информацию об  устройстве  (в
+                      argdx)
+                  2   Прочитать argcx  байтов  в память по ад-
+                      ресу, на который указывает argdx
+                  3   Записать argcx байтов из памяти, начиная
+                      с адреса, на который указывает argdx
+                  4   Тоже, что и 2, причем handle интерпрети-
+                      руется как номер устройства (0  -  теку-
+                      щее, 1 соответствует А, и т.д.)
+                  5   Тоже, что и 3, причем handle интерпрети-
+                      руется как номер устройства (0  -  теку-
+                      щее, 1 соответствует А, и т.д.)
+                  6   Получить состояние ввода
+                  7   Получить состояние вывода
+                  8   Проверить   переместимость  (только  для
+                      DOS 3.0)
+                 11   Установить счетчик   повторений  попыток
+                      доступа к разделяемому устройству (толь-
+                      ко для DOS 3.0)
+               ioctl может быть использована для получения ин-
+               формации  об  устройствах.  Можно применять эту
+               функцию и к обычным файлам,  однако для них до-
+               пустимы только значения func 0, 6, 7. Вызов для
+               файлов при других значениях приводит  к  ошибке
+               EINVAL.
+               Подробную информацию об аргументах и возвращае-
+               мых значениях см.  в описании системной функции
+               0х40 в Вашем руководстве по DOS.
+               Аргументы argdx и argcx являются необязательны-
+               ми.
+               ioctl обеспечивает прямой интерфейс с драйвера-
+               ми устройств DOS для конкретных функций. Поэто-
+               му точное поведение этой функции  будет  разли-
+               чаться для различных устройств и для аппаратуры
+               различных изготовителей.  Более того, некоторые
+               изготовители  не  соблюдают описанный здесь ин-
+               терфейс.  Чтобы правильно использовать  функцию
+               ioctl,  обращайтесь к предоставленной изготови-
+               телем документации по BIOS.
+
+Значение       Для значений func 0 или 1 возвращаемое значение
+               является информацией об устройстве (DX при  вы-
+               зове IOCTL).
+               Для значений func от 2 до 5 возвращаемое значе-
+               ние  является  количеством  реально  переданных
+               байтов.
+               Для значений func 6 и 7  возвращаемое  значение
+               является статусом устройства.
+               В любом случае, если обнаружена ошибка, возвра-
+               щается -1,  и глобальная переменная errno уста-
+               навливается в одно из следующих значений:
+                  EINVAL   Неверный аргумент
+                  EBADF    Неверный номер (обработчика) файла
+                  EINVDAT  Неверные данные
+
+Переносимость  ioctl доступна в системах UNIX,  но  с  другими
+               параметрами и функциями. Версии UNIX 7 и System
+               lll отличаются друг от  друга  в  использовании
+               ioctl. Вызовы ioctl не переносимы в UNIX и ред-
+               ко переносимы между машинами с DOS.
+               Для DOS  3.0 в функцию ioctl добавлены значения
+               func 8 и 11.
+
+Пример         #include <stdio.h>
+               #include <dir.h>
+               #include <io.h>
+
+               int main(void)
+               {
+                  int stat;
+
+               /* использование func 8 для определения,  явля-
+               ется ли устройство съемным */
+                  stat = ioctl(0, 8, 0, 0);
+                  if (!stat)
+                     printf("Drive %c is removable.\n",
+                            getdisk() + 'A');
+                  else
+                     printf("Drive %c is not removable.\n",
+                            getdisk() + 'A');
+                  return 0;
+               }
+
+     isalnum
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int isalnum(int c);
+
+Прототип в     ctype.h
+
+Примечания     isalnum -  это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.  Он  определен  только  тогда,  когда
+               isascii(c) - истина, или с равно EOF.
+               Макрос будет вызван как функция,  если отменить
+               его определение с помощью #undef.
+
+Значение       isalnum возвращает ненулевое значение,  если  с
+               является  буквой  (от A до Z или от a до z) или
+               цифрой (от 0 до 9).
+
+Переносимость  Эта функция доступна в системах UNIX.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+                  if (isalnum(c))
+                     printf("%c is alphanumeric\n", c);
+                  else
+                     printf("%c isn't alphanumeric\n", c);
+                  return 0;
+               }
+
+     isalpha
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int isalpha(int c);
+
+Прототип в     ctype.h
+
+Примечания     isalpha -  это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.  Он  определен  только  тогда,  когда
+               isascii(c) - истина, или с равно EOF.
+               Макрос будет вызван как функция,  если отменить
+               его определение с помощью #undef.
+
+Значение       isalnum возвращает ненулевое значение,  если  с
+               является  буквой  (от A до Z или от a до z).
+
+Переносимость  Эта функция доступна в системах UNIX и  опреде-
+               лена  в  ANSI  C.  Она совместима с Kernighan &
+               Ritchie.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+                  if (isalpha(c))
+                     printf("%c is alphabetic\n", c);
+                  else
+                     printf("%c isn't alphabetic\n", c);
+                  return 0;
+               }
+
+     isascii
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int isascii(int c);
+
+Прототип в     ctype.h
+
+Примечания     isascii -  это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.
+               Он определен для всех целочисленных значений.
+
+Значение       isascii возвращает   ненулевое  значение,  если
+               младший байт с находится в диапазоне  от  0  до
+               127 (0х00 - 0х7F).
+
+Переносимость  Эта функция доступна в системах UNIX.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+                  if (isascii(c))
+                     printf("%c is ascii\n", c);
+                  else
+                     printf("%c isn't ascii\n", c);
+                  return 0;
+               }
+
+     isatty
+──────────────────────────────────────────────────────────────
+Функция        Проверяет тип устройства.
+
+Синтаксис      #include <io.h>
+               int isatty(int handle);
+
+Прототип в     io.h
+
+Примечания     isatty проверяет,  связано  ли  с  обработчиком
+               handle  какое-либо из следующих символьных уст-
+               ройств:
+               - терминал
+               - консоль
+               - принтер
+               - последовательный порт
+
+Значение       Если устройство   является   символьным    уст-
+               ройством,  isatty  возвращает  целое число,  не
+               равное  нулю;  в  противном  случае  возвращает
+               нуль.
+
+Переносимость  Эта функция доступна только в DOS.
+
+Пример         #include <stdio.h>
+               #include <io.h>
+
+               int main(void)
+               {
+                  int handle;
+
+                  handle = fileno(stdprn);
+                  if (isatty(handle))
+                     printf("Handle %d is a device type\n",
+                            handle);
+                  else
+                     printf("Handle %d isn't a device type\n",
+                            handle);
+                  return 0;
+               }
+
+     iscntrl
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int iscntrl(int c);
+
+Прототип в     ctype.h
+
+Примечания     iscntrl -  это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.  Он  определен  только  тогда,  когда
+               isascii(c) - истина, или с равно EOF.
+               Макрос будет вызван как функция,  если отменить
+               его определение с помощью #undef.
+
+Значение       iscntrl возвращает ненулевое значение,  если  с
+               является символом удаления или обычным управля-
+               ющим символом (0х7F или от 0х00 до 0х1F).
+
+Переносимость  Эта функция доступна в  системах  UNIX  и  сов-
+               местима с ANSI C.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+                  if (iscntrl(c))
+                     printf("%c is a control character\n", c);
+                  else
+                   printf("%c isn't a control character\n",c);
+                  return 0;
+               }
+
+     isdigit
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int isdigit(int c);
+
+Прототип в     ctype.h
+
+Примечания     isdigit -  это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.  Он  определен  только  тогда,  когда
+               isascii(c) - истина, или с равно EOF.
+               Макрос будет вызван как функция,  если отменить
+               его определение с помощью #undef.
+
+Значение       isdigit возвращает ненулевое значение,  если  с
+               является цифрой (от 0 до 9).
+
+Переносимость  Эта функция доступна в  системах  UNIX  и  сов-
+               местима с ANSI C.  Она совместима с Kernighan &
+               Ritchie.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+                  if (isdigit(c))
+                     printf("%c is a digit\n", c);
+                  else
+                     printf("%c isn't a digit\n", c);
+                  return 0;
+               }
+
+     isgraph
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int isgraph(int c);
+
+Прототип в     ctype.h
+
+Примечания     isgraph -  это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.  Он  определен  только  тогда,  когда
+               isascii(c) - истина, или с равно EOF.
+               Макрос будет вызван как функция,  если отменить
+               его определение с помощью #undef.
+
+Значение       isgraph возвращает ненулевое значение,  если  с
+               является    печатаемым   символом   (аналогично
+               isprint), но не является символом пробела.
+
+Переносимость  Эта функция доступна в  системах  UNIX  и  сов-
+               местима с ANSI C.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+                  if (isgraph(c))
+                     printf("%c is a graphic character\n", c);
+                  else
+                   printf("%c isn't a graphic character\n",c);
+                  return 0;
+               }
+
+     islower
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int islower(int c);
+
+Прототип в     ctype.h
+
+Примечания     islower -  это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.  Он  определен  только  тогда,  когда
+               isascii(c) - истина, или с равно EOF.
+               Макрос будет вызван как функция,  если отменить
+               его определение с помощью #undef.
+
+Значение       islower возвращает ненулевое значение,  если  с
+               является строчной буквой (от a до z).
+
+Переносимость  Эта функция доступна в  системах  UNIX  и  сов-
+               местима с ANSI C.  Она совместима с Kernighan &
+               Ritchie.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+                  if (islower(c))
+                     printf("%c is a lower case\n", c);
+                  else
+                     printf("%c isn't a lower case\n", c);
+                  return 0;
+               }
+
+     isprint
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int isprint(int c);
+
+Прототип в     ctype.h
+
+Примечания     isprint -  это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.  Он  определен  только  тогда,  когда
+               isascii(c) - истина, или с равно EOF.
+               Макрос будет вызван как функция,  если отменить
+               его определение с помощью #undef.
+
+Значение       isprint возвращает ненулевое значение,  если  с
+               является печатаемым символом (от 0х20 до 0х7Е).
+
+Переносимость  Эта функция доступна в  системах  UNIX  и  сов-
+               местима с ANSI C.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+              if (isprint(c))
+                printf("%c is a printable character\n", c);
+              else
+                printf("%c isn't a printable character\n", c);
+              return 0;
+               }
+
+     ispunct
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int ispunct(int c);
+
+Прототип в     ctype.h
+
+Примечания     ispunct -  это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.  Он  определен  только  тогда,  когда
+               isascii(c) - истина, или с равно EOF.
+               Макрос будет вызван как функция,  если отменить
+               его определение с помощью #undef.
+
+Значение       ispunct возвращает ненулевое значение,  если  с
+               является символом   пунктуации   (iscntrl   или
+               isspace).
+
+Переносимость  Эта функция доступна в  системах  UNIX  и  сов-
+               местима с ANSI C.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+               if (ispunct(c))
+                 printf("%c is a punctuation character\n", c);
+               else
+                 printf("%c isn't a punctuation character\n",
+                         c);
+               return 0;
+               }
+
+     isspace
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int isspace(int c);
+
+Прототип в     ctype.h
+
+Примечания     isspace -  это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.  Он  определен  только  тогда,  когда
+               isascii(c) - истина, или с равно EOF.
+               Макрос будет вызван как функция,  если отменить
+               его определение с помощью #undef.
+
+Значение       isspace возвращает ненулевое значение,  если  с
+               является символом пробела,  табуляции, возврата
+               каретки,  конца строки,  вертикальной табуляции
+               или конца страницы (от 0х09 до 0х0D и 0x20).
+
+Переносимость  Эта функция доступна в  системах  UNIX  и  сов-
+               местима с ANSI C.  Она совместима с Kernighan &
+               Ritchie.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+                  if (isspace(c))
+                     printf("%c is a white space\n", c);
+                  else
+                     printf("%c isn't a white space\n", c);
+                  return 0;
+               }
+
+     isupper
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int isupper(int c);
+
+Прототип в     ctype.h
+
+Примечания     isupper -  это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.  Он  определен  только  тогда,  когда
+               isascii(c) - истина, или с равно EOF.
+               Макрос будет вызван как функция,  если отменить
+               его определение с помощью #undef.
+
+Значение       isupper возвращает ненулевое значение,  если  с
+               является прописной буквой (от A до Z).
+
+Переносимость  Эта функция доступна в  системах  UNIX  и  сов-
+               местима с ANSI C.  Она совместима с Kernighan &
+               Ritchie.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+                  if (issupper(c))
+                     printf("%c is upper case\n", c);
+                  else
+                     printf("%c isn't upper case\n", c);
+                  return 0;
+               }
+
+     isxdigit
+──────────────────────────────────────────────────────────────
+Функция        Макрос для классификации символов.
+
+Синтаксис      #include <ctype.h>
+               int isxdigit(int c);
+
+Прототип в     ctype.h
+
+Примечания     isxdigit - это  макрос,  который классифицирует
+               целые  значения,  представляющие  ASCII-коды, в
+               соответствии с таблицей.  Это - предикат, возв-
+               ращающий ненулевое значение для истины и нуль -
+               для  лжи.  Он  определен  только  тогда,  когда
+               isascii(c) - истина, или с равно EOF.
+               Макрос будет вызван как функция,  если отменить
+               его определение с помощью #undef.
+
+Значение       isxdigit возвращает ненулевое значение, если  с
+               является шестнадцатеричной цифрой (от 0  до  9,
+               от A до F, от a до f).
+
+Переносимость  Эта функция доступна в  системах  UNIX  и  сов-
+               местима с ANSI C.
+
+Пример         #include <ctype.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  char c = 'C';
+
+                  if (isxdigit(c))
+                     printf("%c is hexadecimal\n", c);
+                  else
+                     printf("%c isn't hexadecimal\n", c);
+                  return 0;
+               }
+
+     itoa
+──────────────────────────────────────────────────────────────
+Функция        Преобразует целое число в строку.
+
+Синтаксис      #include <stdlib.h>
+               char *itoa(int value, char *string, int radix);
+
+Прототип в     stdlib.h
+
+Примечания     itoa преобразует  значение  аргумента  value  в
+               строку,  завершаемую нуль-символом,  и помещает
+               результат в *string.  Аргумент  value  -  целое
+               число.
+               radix определяет основание системы счисления, в
+               которую  будет  преобразовано  value.  Аргумент
+               radix может иметь значение от 2 до  36  включи-
+               тельно.   Если   value  содержит  отрицательное
+               число,  а radix равно 10,  то первым символом в
+               *string будет знак минуса (-).
+               Область, отведенная  под  string,  должна  быть
+               достаточно большой, чтобы разместить полученную
+               строку,  включая  завершающий нуль-символ (\0).
+               itoa может вернуть до 17 байтов.
+
+Значение       itoa возвращает указатель на *string.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      ltoa, ultoa
+
+Пример         #include <stdlib.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  int number = 12345;
+                  char string[25];
+
+                  itoa(number, string, 10);
+                  printf("integer = %d string = %s\n", number,
+                  string);
+                  return 0;
+               }
+
+     kbhit
+──────────────────────────────────────────────────────────────
+Функция        Проверяет, была ли нажата клавиша.
+
+Синтаксис      #include <conio.h>
+               int kbhit(void);
+
+Прототип в     conio.h
+
+Примечания     kbhit позволяет определить, была ли нажата кла-
+               виша. Любая нажатая клавиша может быть получена
+               с помощью функций getch или getche.
+
+Значение       Если какая-либо клавиша была нажата,  возвраща-
+               ется ненулевое  значение;  в  противном  случае
+               возвращается нуль.
+
+Переносимость  Эта функция доступна только в DOS.
+
+См. также      getch, getche
+
+Пример         #include <conio.h>
+
+               int main(void)
+               {
+                  cprintf("Press any key to continue:");
+                  while (!kbhit()) /* ничего не делать */ ;
+                  cprintf("\r\nA key was pressed...\r\n");
+                  return 0;
+               }
+
+     keep
+──────────────────────────────────────────────────────────────
+Функция        Завершает программу и оставляет ее резидентной.
+
+Синтаксис      #include <dos.h>
+               void keep(unsigned char status, unsigned size);
+
+Прототип в     dos.h
+
+Примечания     keep возвращает управление в  DOS  со  статусом
+               выхода,  заданным  в параметре status.  Текущая
+               программа,  однако, остается резидентной. Длина
+               программа  устанавливается  size параграфов,  а
+               оставшаяся память освобождается.
+               keep может  использоваться  для установки рези-
+               дентных (TSR) программ. keep использует систем-
+               ную функцию DOS 0х31.
+
+Значение       Нет.
+
+Переносимость  Эта функция доступна только в DOS.  Она не сов-
+               местима с Windows.
+
+См. также      abort, exit
+
+Пример         /*** Примечание:
+               Это пользовательская программа  прерывания.  Вы
+               НЕ  сможете  откомпилировать  эту  программу  с
+               включенным Test Stack Overflow и  получить  вы-
+               полнимый файл,  который будет работать правиль-
+               но.  Из-за природы этой функции, формула, кото-
+               рая используется для подсчета числа параграфов,
+               необязательно будет работать во  всех  случаях.
+               Пользуйтесь осторожно!  Резидентные (TSR) прог-
+               раммы сложны и другой поддержкой не обеспечены.
+               Обратитесь к технической документации по MS-DOS
+               для более полной информации. */
+
+               #include <dos.h>
+               /* Прерывание в текущий момент времени */
+               #define INTR 0x1C
+               /* Атрибуты экрана (голубой на сером) */
+               #define ATTR 0x7900
+
+               /* уменьшение размера кучи и размера стека для
+                  уменьшения программы в памяти */
+               extern unsigned _heaplen = 1024;
+               extern unsigned _stklen  = 512;
+
+               void interrupt ( *oldhandler)(void);
+
+               void interrupt handler(void)
+               {
+                  unsigned int (far *screen)[80];
+                  static int count;
+
+               /* Для цветного экрана видеопамять в В800:0000.
+                  Для монохромной системы - В000:0000 */
+                  screen = MK_FP(0xB800,0);
+
+               /* увеличение счетчика в диапазоне от 0 до 9 */
+                  count++;
+                  count %= 10;
+
+               /* вывод номера на экран */
+                  screen[0][79] = count + '0' + ATTR;
+
+               /* вызов старого обработчика прерываний */
+                  oldhandler();
+               }
+
+               int main(void)
+               {
+
+               /* получить адрес прерывания в текущий момент
+                  времени */
+               oldhandler = getvect(INTR);
+
+               /* установка нового обработчика прерывания */
+               setvect(INTR, handler);
+
+               /* _psp это начальный адрес программы в памяти.
+               Начало стека  это  конец  программы.  Используя
+               вместе  _SS и _SP,  можно получить конец стека.
+               Вы можете добавить свободный  бит  для  уверен-
+               ности в том,  что будет распределено достаточно
+               места ie:  (_SS + ((_SP + safety  space)/16)  -
+               _psp) */
+
+               keep(0, (_SS + (_SP/16) - _psp));
+               return 0;
+               }
+
+     labs
+──────────────────────────────────────────────────────────────
+Функция        Возвращает абсолютное значение типа long.
+
+Синтаксис      #include <math.h>
+               long int labs(long int x);
+
+Прототип в     math.h, stdlib.h
+
+Примечания     labs вычисляет абсолютное значение параметра х.
+
+Значение       labs возвращает абсолютное значение х.
+
+Переносимость  Эта функция  доступна в системах UNIX и опреде-
+               лена в ANSI C.
+
+См. также      abs, cabs, fabs
+
+Пример         #include <stdio.h>
+               #include <math.h>
+
+               int main(void)
+               {
+                  long result;
+                  long x = -12345678L;
+
+                  result= labs(x);
+                  printf("number: %ld abs value: %ld\n",
+                     x, result);
+
+                  return 0;
+               }
+
+     ldexp
+──────────────────────────────────────────────────────────────
+Функция        Вычисляет x * 2**exp.
+
+Синтаксис      #include <math.h>
+               double ldexp(double x, int exp);
+
+Прототип в     math.h
+
+Примечания     ldexp   вычисляет   значение  x * 2**exp   типа
+               double.
+
+Значение       При успешном завершении  ldexp  возвращает  вы-
+               численное значение x * 2**exp.
+               Обработка ошибок для этой  функции  может  быть
+               модифицирована посредством функции matherr.
+
+Переносимость  Эта функция  доступна в системах UNIX и опреде-
+               лена в ANSI C.
+
+См. также      exp, frexp, modf
+
+Пример         #include <stdio.h>
+               #include <math.h>
+
+               int main(void)
+               {
+                  double value;
+                  double x = 2;
+
+               /* ldexp возводит 2 в третью степень, и резуль-
+               тат умножает на 2 */
+                  value = ldexp(x,3);
+                  printf("The ldexp value is: %lf\n",
+                     value);
+
+                  return 0;
+               }
+
+     ldiv
+──────────────────────────────────────────────────────────────
+Функция        Делит целые числа типа long,  возвращая частное
+               и остаток.
+
+Синтаксис      #include <stdlib.h>
+               ldiv_t ldiv(long int numer, long int denom);
+
+Прототип в     stdlib.h
+
+Примечания     ldiv делит целые числа типа long  и  возвращает
+               частное  от  деления и остаток в виде структуры
+               типа ldiv_t.  Аргументы numer и denom представ-
+               ляют  числитель  и  знаменатель соответственно.
+               Структура  ldiv_t  определена  (с  typedef)   в
+               stdlib.h следующим образом:
+                  typedef struct {
+                     long int quot;   /* частное */
+                     long int rem;    /* остаток */
+                  } ldiv_t;
+
+Значение       ldiv возвращает  структуру,  элементами которой
+               являются quot(частное) и rem(остаток).
+
+Переносимость  Эта функция совместима с ANSI C.
+
+См.также       div
+
+Пример         #include <stdlib.h>
+               #include <stdio.h>
+
+               int main(void)
+               {
+                  ldiv_t lx;
+
+              lx = ldiv(100000L, 30000L);
+              printf("100000 div 30000 = %ld remainder %ld\n",
+                     lx.quot, lx.rem);
+              return 0;
+               }

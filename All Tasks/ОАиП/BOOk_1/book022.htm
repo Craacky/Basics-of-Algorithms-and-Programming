@@ -1,0 +1,73 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
+<title>Документация по Cи, C++ и Visual C++</title>
+</head>
+
+<body background="../../background/bg6.gif" link="Black" vlink="Black" topmargin=2
+leftmargin="5" bgcolor="Aqua">
+
+<p align="center"><br>
+<font face="Arial" color="Maroon"><strong><big>Функции Fopen, fclose, getc, putc</big></strong></font></p>
+<div align="center"><center>
+
+<table width="90%" height="132" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="100%" height="132" valign="middle"><p align="left"><strong><font face="Arial"
+    color="#0080FF"><big>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Стр. 22 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </big></font><font
+    face="Arial" color="#800000"><small>&lt; <a href="../visual_docum1.htm" target="_self"
+    style="color: rgb(128,64,64)">оглавление </a>&gt;</small></font></strong><font
+    face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">В тех случаях,
+    когда программа обрабатывает достаточно большой
+    объем данных, последние обычно организуются и
+    хранятся вне оперативной памяти ЭВМ. Наиболее
+    эффективным устройством для организации
+    внешнего хранения данных являются диски. Прежде
+    чем читать или записывать иформацию в файл, надо
+    открыть его с помощью стандартной библиотечной
+    функции <strong>fopen. </strong>Программа, использующая эту
+    функцию, должна включать во время компиляции
+    системный файл <strong>stdio.h, </strong>в котором определен
+    новый тип данных - <strong>FILE.</strong> </font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp; В
+    программе нужно описывать ссылки на файлы и
+    выглядит это, например, так: <strong>FILE *fu; </strong>Здесь <strong>fu
+    </strong>означает указатель на <strong>FILE</strong>, а <strong>fopen </strong>выдает
+    ссылку на этот файл. Функция <strong>fopen </strong>имеет
+    следующий заголовок:</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp; <strong>FILE
+    *fopen(char *fname, char type);</strong></font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">Обращение к <strong>fopen
+    </strong>в программе делается так: <strong>fu=fopen(fname, type); </strong>Строка
+    символов <strong>fname </strong>содержит имя файла, который
+    надо открыть; <strong>type-</strong> тоже строкасимволов,
+    заключенная в кавычки и указывающая, как бует
+    использоваться файл: &quot;<strong>r</strong>&quot;-чтение, &quot;<strong>w</strong>&quot;
+    - запись, &quot;<strong>r+</strong>&quot; - чтение с дозаписью,
+    &quot;<strong>a</strong>&quot; -дозапись. Функция <strong>fopen </strong>возвращает
+    указатель, с помощью которого мы в дальнейшем
+    будем обращаться к этому файлу. Примеры:</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="37%">
+      <tr>
+        <td width="100%"><strong><font face="Times New Roman" color="#000000">FILE *uin, *uout;<br>
+        uin=fopen(&quot;MAK1&quot;,&quot;r&quot;);<br>
+        uout=fopen(&quot;MAK2&quot;,&quot;w&quot;);</font></strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left"><font color="#000000"><small>&nbsp;&nbsp; </small>Файл
+    с именем <strong>MAK1 </strong>открывается для чтения и
+    далее идентифицируется как <strong>uin; </strong>файл <strong>MAK2
+    </strong>открывается для записи и связывается с
+    идентификатором <strong>uout. </strong></font></p>
+    <p align="center"><font face="Arial" color="#804040"><small><strong>&lt; <a
+    href="book021.htm" target="_self" style="color: rgb(128,64,64)">Назад</a> &gt;
+    </strong></small></font><br>
+    </td>
+  </tr>
+</table>
+</center></div>
+</body>
+</html>

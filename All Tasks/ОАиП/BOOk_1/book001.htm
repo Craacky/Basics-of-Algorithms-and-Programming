@@ -1,0 +1,105 @@
+<html>
+
+<head>
+</head>
+
+<body link="#000000" vlink="#000000" topmargin="2"
+leftmargin="5" bgcolor="#B3FFD9"
+background="../../background/bg6.gif">
+
+<p align="center"><br>
+<font face="Arial" color="maroon"><big><strong>Стандарные
+подпрограммы (функции Printf</strong>, <strong>Scanf)</strong>
+</big></font>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </p>
+<div align="center"><center>
+
+<table border="0" width="90%" bgcolor="#B3FFD9" cellpadding
+bordercolorlight=""
+bordercolordark="#0055AA" cellspacing>
+  <tr>
+    <td width="100%"><p align="left"><strong>
+	<font face="Arial" color="#0080FF"><big>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	&nbsp;
+    Стр. 1 </big></font><font face="Arial" color="#800000">
+	<small>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt; <a href="../visual_docum1.htm" target="_self"
+	style="color: rgb(128,64,64)">оглавление
+    </a>&gt;</small></font></strong></p>
+    <p>&nbsp;&nbsp; Сейчас мы познакомимся с важнейшими
+    понятиями и особенностями языка Си на нескольких
+    примерах. При этом мы сконцентрируем наше
+    внимание на таких понятиях, как константа и
+    переменные, арифметические действия над ними,
+    основные управляющие структуры, функции и
+    простейший ввод-выод.</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; К наиболее
+интересным и важным функциям языка относится <strong>printf
+</strong>.
+    Она предназначена для форматного вывода данных.
+    Например, чтобы вывести некоторое сообщение на
+    экран дисплея, достаточно использовать вызов
+    функции:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>printf
+    (&quot;Интересное сообщение \n&quot;);</strong></p>
+    <p>&nbsp;&nbsp; Одним из механизмов взаимодействия
+    являются параметры. Список параметров
+    (аргументов) идет вслед за именем функции в
+    круглых скобках. В данном случае аргументом
+    служит строковая константа - любая
+    последовательность символов, в кавычках.
+ Комбинация <strong>&quot; \n &quot; </strong>означает переход
+    на новую строку. Первый пример можно заменить вот
+    на такую строчку:</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	&nbsp;&nbsp;&nbsp;&nbsp; <strong>printf
+    (&quot;Интересное сообщение &quot;);</strong> <strong>prin
+	tf(&quot; \n
+    &quot;)</strong>;&nbsp; </p>
+    <p>&nbsp;&nbsp; - результат будет точно таким же, как и в
+    первом случае! </p>
+    <p>&nbsp;&nbsp; Первым аргументом служит строка
+    форматов, а вторым, если они есть, - выводимые
+    объекты. Строка форматов может включать обычные
+    символы, которые начинаются со знака <strong>%</strong>,
+    за ним следует символ преобразования. Каждая
+    спецификация преобразования соответствует
+    одному из аргументов, которые следуют за
+    форматной строкой.Буква <strong>d </strong>в
+    спецификации преобразования указывает, что
+    значение аргумента должно быть напечатано как
+    десятичное целое число. Из других символов
+    отметим : <strong>c </strong>- для вывода отдельного
+    символа; <strong>s</strong> - для печати символьной
+   строки; <strong>x </strong>и <strong>o - </strong>для вывода
+    шестнадцатиричных и восьмиричных чисел
+    соответственно;<strong> f </strong>- для вывода чисел с
+    плавающей точкой. В следующем примере </p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <strong>printf(&quot; %c = %d \n&quot;,g,g);</strong></p>
+    <p>&nbsp; значение переменной <strong>g </strong>выводиться
+    как символ алфавита, а после знака &nbsp;&nbsp;&nbsp;
+    равенства - как числовое значение,
+    соответствующее внутреннему&nbsp; (машинному) коду
+    этого символа. Перед символом преобразования
+    может стоять, явно указывающий количество
+    позиций в выводимой строке, отведенных для
+    элемента вывода.</p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <strong>printf(&quot; %c = %<big>5</big>d \n&quot;,g,g);
+	</strong></p>
+    <p align="center"><font face="Arial" color="#804040">
+	<small><strong>&lt; <a
+    href="book002.htm" style="color: rgb(128,64,64)">Дальше</a
+	> &gt;&nbsp;<br>
+    &nbsp; &nbsp; </strong></small></font></td>
+  </tr>
+</table>
+</center></div>
+</body>
+</html>

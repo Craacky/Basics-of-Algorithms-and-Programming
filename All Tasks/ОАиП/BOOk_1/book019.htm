@@ -1,0 +1,192 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
+<title>Документация по Cи, C++ и Visual C++</title>
+</head>
+
+<body background="../../background/bg6.gif" link="Black" vlink="Black" topmargin=2
+leftmargin="5" bgcolor="Aqua">
+
+<p align="center"><br>
+<font face="Arial" color="Maroon"><strong><big>Препроцессор языка Си</big></strong></font></p>
+<div align="center"><center>
+
+<table width="90%" height="132" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="100%" height="132" valign="middle"><p align="left"><strong><font face="Arial"
+    color="#0080FF"><big>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Стр. 19 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </big></font><font
+    face="Arial" color="#800000"><small>&lt; <a href="../visual_docum1.htm" target="_self"
+    style="color: rgb(128,64,64)">оглавление </a>&gt;</small></font></strong><font
+    face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">Мы уже
+    использовали некоторые возможности
+    препроцессора языка Си, сейчас поговорим о нем
+    более подробно. <strong>Препроцессор </strong>(макропроцессор)
+    - это составная часть стандартного пакета языка
+    Си, которая обрабатывает исходный текст
+    программы до того, как он пройдет через
+    компилятор. Препроцессор читает строки текста и
+    выполняет действия, определяемые командными
+    строками. Если первый отличный от пробела символ
+    в строке- управляющий (<strong># </strong>), то такая
+    строка рассматривается препроцессором как
+    командная. Строки, не являющиеся командными, либо
+    подвергаются преобразованиям, либо остаются без
+    изменения. </font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Рассиотрим наиболее часто используемые
+    возможности препроцессора: макрогенерация
+    (замена лексических единиц), включение файлов,
+    условная компиляция.</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp; <strong>Замена
+    лексических единиц</strong>. Командная строка вида <strong>#define
+    name text</strong> вызывает в оставшейся части программы
+    замену всех вхождений идентификатора <strong>name </strong>на
+    строку <strong>text. </strong>Например, определение <strong>#define
+    p1 3.14159265 </strong>позволяет использовать в программе
+    имя <strong>p1 </strong>вместо константы <strong>3.14159265. </strong>Обратите
+    внимание, что это определение не завершается
+    точкой с запятой. Замещающий текст обычно
+    представляет собою остаток строки. Длинное
+    определение можно продолжить, если в конце
+    продолжаемой строки поставить <strong>\.</strong> Внутри
+    строк, заключенных в кавычки, подстановка не
+    производится, так что, например, для
+    определенного выше имени <strong>P1 в printf(&quot;P1&quot;); </strong>подстановки
+    не будет. Имена могут переопределяться и новые
+    определения могут использовать ранее введенные
+    определения. </font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp; Так как
+    препроцессор не является частью компилятора
+    языка Си, а представляет относительно простой
+    макрогенератор, имеется возможность
+    переопределять различные синтаксические
+    единицы языка-лексемы (т.е. идентификаторы,
+    ключевые слова, константы, цепочки литер, знаки
+    операций и знаки пунктуаций). В приведенной (на
+    примере 6.2) программе, предназначенной для
+    выявления всех пар целых чисел из интервала <strong>[-n,n],
+    </strong>являющихся решениями уравнения <strong>2*y-x*x =4 , </strong>используются
+    привычные для таких языков как Алгол, Паскаль,
+    операторные скобки <strong>begin-end </strong>вместо пары <strong>{},
+    </strong>ключевое слово <strong>then </strong>. Это стало
+    возможным благодаря предварительно
+    определенным лексическим заменам. </font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">Пример 6.2</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="50%">
+      <tr>
+        <td width="100%"><strong>#include &lt;stdio.h&gt;<br>
+        #define then<br>
+        #define begin {<br>
+        #define end }<br>
+        main()<br>
+        begin<br>
+        int n,x,y,k=0;<br>
+        printf(&quot;введи n\n&quot;);scanf(&quot;%d&quot;,&amp;n);<br>
+        for(x=-n;x&lt;=n;x++)<br>
+        for(y=-n;y&lt;=n;y++)<br>
+        &nbsp; if(2*y-x*x==4)then<br>
+        &nbsp;&nbsp; begin<br>
+        &nbsp;&nbsp;&nbsp; k=k+1;<br>
+        &nbsp;&nbsp;&nbsp; printf(x=%d, y=%d\n&quot;,x,y);<br>
+        &nbsp;&nbsp; end<br>
+        if(k==0) then<br>
+        printf(&quot;корней нет\n &quot;);<br>
+        end</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left"><font face="Times New Roman" color="#000000">Приведенная
+    выше технология замены лесксем относится к <strong>макросредствам
+    </strong>языка. Строка <strong>#define&nbsp; name text </strong>называется
+    макроопределением, <strong>name </strong>называется
+    макрошаблоном, а <strong>text </strong>- макрорасширением.
+    Каждое появление имени <strong>name </strong>в теле
+    программы называется <strong>макровызовом. </strong>Командная
+    строка</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <strong>#define name (p1,p2, ..,pk) text</strong></font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">является
+    макроопределением с аргументами. За именем <strong>name
+    </strong>в круглых скобках (после <strong>name </strong>не
+    должно быть пробела!) следует разделенные
+    запятыми формальные параметры <strong>p1, p2 .., pk, </strong>также
+    являющиеся идентификаторами. Каждый раз, когда в
+    тексте программы встречается имя
+    макроопределения с фактичкскими аргументами,
+    они подставляются вместо формальных, так что
+    заменяющий текст будет зависеть от вида
+    макровызова. Определим в качестве примера такую
+    макроподстановку:</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp; #<strong>define
+    MAX(X,Y) ((X)&gt;(Y)?(X):(Y))</strong></font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">Как и в
+    определении функции, переменные <strong>X </strong>и <strong>Y
+    </strong>в макроопределении являются формальными
+    параметрами. После этого строка в программе:</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <strong>m=MAX(a+b, a-b);</strong></font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">будет заменена
+    на строку </font></p>
+    <p align="left"><strong><font face="Times New Roman" color="#000000">m=((a+b)&gt;(a-b)?(a+b):(a-b);</font></strong></p>
+    <p align="left"><font face="Times New Roman" color="#000000">Текст
+    макроопределения берут в скобки для обеспечения
+    большей надежности программы. Пренебрежение
+    скобками может привести к серьезным ошибкам, что
+    иллюстрирует следующий пример 6.3. делит число <strong>16</strong>
+    на квадрат числа <strong>2 </strong>и дает правильный
+    результат. Во второй программе (пример 6.4), где
+    скобки в макроопределении опущены, результат
+    ошибочный, так как макроподстановка породила
+    текст:</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <strong>printf(&quot;%d\n&quot;,16/2*2);</strong></font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">что конечно, не
+    равносильно задуманному.</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;
+    Пример 6.3</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="37%">
+      <tr>
+        <td width="100%"><strong>&nbsp; #include &lt;stdio.h&gt;<br>
+        #define SQR(n) (n*n)<br>
+        main()<br>
+        {<br>
+        printf(&quot;%d\n&quot;,16/SQR(2));<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left"><font color="#000000">Пример 6.4</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="37%">
+      <tr>
+        <td width="100%"><strong>#include &lt;stdio.h&gt;<br>
+        #define SQR(n) n*n<br>
+        main()<br>
+        {<br>
+        printf(&quot;%d\n&quot;,16/SQR(2));<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left"><font face="Arial" color="#804040"><small><strong>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </strong></small></font><font color="#000000">Макроопределения
+    иногда используются вместо определений функций,
+    обычно из сображений эффективности. Но следует
+    помнить, что препроцесор может лишь тупо и
+    бездумно заменять одну строку на другую, не
+    разбираясь, зачем это нужно. В отличае от
+    параметра функции, параметр макроопределения
+    вычисляется при каждом вхождении в
+    макроопределение. Поэтому иакровызов <strong>MAX(i++,
+    j++)</strong>&nbsp; для приведенного выше
+    макроопределения к увеличению <strong>i </strong>и <strong>j </strong>на
+    2. </font></p>
+    <p align="center"><font face="Arial" color="#804040"><small><strong>&lt; <a
+    href="book018.htm" target="_self" style="color: rgb(128,64,64)">Назад</a> &gt;
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt; <a href="book020.htm"
+    style="color: rgb(128,64,0)">Дальше</a> &gt;</strong></small></font><br>
+    </td>
+  </tr>
+</table>
+</center></div>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
+<title>Документация по Cи, C++ и Visual C++</title>
+</head>
+
+<body background="../../background/bg6.gif" link="Black" vlink="Black" topmargin=2
+leftmargin="5" bgcolor="Aqua">
+<small><strong><font face="Arial">
+
+<p align="center"><br>
+<font face="Arial" color="Maroon"><big>Оператор WHILE </big></font></p>
+<div align="center"><center>
+
+<table width="90%" height="132" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="100%" height="132"><p align="left"><strong><font face="Arial" color="#0080FF"><big>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Стр.
+    5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </big></font><font
+    face="Arial" color="#800000"><small>&lt; <a href="../visual_docum1.htm" target="_self"
+    style="color: rgb(128,64,64)">оглавление </a>&gt;</small></font></strong></p>
+    <p align="left">&nbsp;&nbsp; <font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    В языке Си основной структурой, управляющей
+    повторением, служит цикл с предусловием <strong>while </strong>(пока).
+    Он имеет следующий формат</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <strong>while (условие) оператор;</strong></font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">Условие всегда
+    заключено в скобки, оно может быть произвольным
+    выражением. Опрератор <strong>while</strong> повторяет
+    выполнение оператора следующего условия, до тех
+    пор, пока это условие истинно. Если это условие не
+    истинно с самого начала или становится не
+    истинным в процессе выполнения данного
+    опрератора, то управление передается оператору,
+    следующему за опрератором цикла. Если
+    повторяемая часть оператора содержит более
+    одного оператора, то повторяемая группа
+    операторов должна быть заключена в фигурные
+    скобки скобки, например:
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="37%">
+      <tr>
+        <td width="100%"><strong>while(условие)<br>
+        {<br>
+        &nbsp;&nbsp; оператор_1;<br>
+        &nbsp;&nbsp; оператор_2;<br>
+        &nbsp;&nbsp; ....<br>
+        &nbsp;&nbsp;&nbsp; оператор<br>
+        }<br>
+        </strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Для описания
+    условий в операторе <strong>while </strong>используются
+    операции условия такие же, как и в операторе <strong>if
+    </strong>. Приведенная ниже программа подсчитывает
+    сумму цифр введенного числа <strong>N</strong>. Цикл <strong>while
+    </strong>последовательно выделяет и суммирует цифру
+    исходного числа, начиная с последней; для для
+    выделения применяется операция взятия остатка
+    от деления - <strong>%</strong>. При делении целых чисел
+    любая дробная чать отбрасывается, поэтому после
+    операции <strong>N=N/10</strong>; исходное число
+    уменьшается в 10 раз при каждом &quot;обороте&quot;
+    цикла, пока, наконец, не станет равным нулю, после
+    чего цикл завершается и на экран дисплея
+    выдается значение переменной <strong>S</strong>, в
+    котором содержится сумма цифр числа <strong>N</strong>.</p>
+    <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Пример 1.6</p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="53%">
+      <tr>
+        <td width="100%"><strong><font face="Times New Roman">#include &lt;stdio.h&gt;<br>
+        main()<br>
+        &nbsp; {<br>
+        &nbsp;&nbsp;&nbsp; int N,S,Z;<br>
+        &nbsp;&nbsp;&nbsp; S=0;<br>
+        &nbsp;&nbsp;&nbsp; printf(&quot;ВВЕДИ N\n&quot;);<br>
+        &nbsp;&nbsp;&nbsp; scanf(&quot;%d&quot;,&amp;N)<br>
+        &nbsp;&nbsp;&nbsp; while(N!=0)<br>
+        {<br>
+        &nbsp;&nbsp; Z=N%10<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N=N/10<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; S=S+Z;<br>
+        }<br>
+        &nbsp;&nbsp;&nbsp; printf(&quot;СУММА ЦИФР=%d\n&quot;,S);<br>
+        &nbsp; } </font></strong><br>
+        </td>
+      </tr>
+    </table>
+    </center></div><p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Рассмотрим еще один пример. Здесь приведена
+    программа, которая реализует лгоритм разложения
+    числа на простые множители. Для сокращения
+    времени счета отдельно рассматривается случай
+    множителя, равного двум, чтобы в последующем
+    рассматривать только нечетные множители. &nbsp;&nbsp; </p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Пример 1.7</p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="68%">
+      <tr>
+        <td width="100%">/<strong>*РАЗЛОЖИТЬ ЧИСЛО НА МНОЖИТЕЛИ */<br>
+        &nbsp;&nbsp; #include &lt;stdio.h&gt;<br>
+        &nbsp;&nbsp; main()<br>
+        {<br>
+        int M,i=3;<br>
+        printf(&quot;ВВЕДИ M\n&quot;);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; scanf(&quot;%d&quot;,&amp;M);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf(&quot;%d=1&quot;,M);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while(M%2==0)<br>
+        {<br>
+        printf(&quot;*%d&quot;,2);<br>
+        &nbsp; M=M/2;<br>
+        }&nbsp; <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while(i &lt;=M)<br>
+        {<br>
+        if(M%i==0)<br>
+        {<br>
+        printf(&quot;*%d&quot;,i);<br>
+        M=M/i;<br>
+        }<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; else <br>
+        &nbsp;&nbsp;&nbsp; i=i+2<br>
+        }<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p><font face="Times New Roman" color="#804040">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </font><font face="Times New Roman" color="#000000">Иногда структуры со
+    вложенными друг в друга операторами повторения
+    называюися циклами. Следующяя программа простая</font><font
+    face="Times New Roman" color="#804040">, </font><font face="Times New Roman"
+    color="#000000">хотя и содержит <strong>вложенные </strong>циклы.
+    Она выводит на экран заполненный символом *
+    треугольник, высота которого равна N.<br>
+    &nbsp;&nbsp;&nbsp; Во внешнем цикле устанавливается
+    очередная строка вывода (параметр i ), а во
+    внутреннем (параметр j ) в очередную строку
+    вводится ровно i символов &quot; * &quot;&nbsp;&nbsp; Вызов
+    функции <strong>printf(&quot;\n&quot;)&nbsp;&nbsp; </strong>обеспечивает
+    в нужный момент переход нат новую строку.
+    Обратите внимание, что для вывода одного символа
+    в форматной строке функции <strong>printf</strong>
+    используется спецификация <strong>%c</strong>. </font></p>
+    <p><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Пример 1.8 </font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="51%">
+      <tr>
+        <td width="100%"><strong>#include &lt;stdio.h&gt;<br>
+        main()<br>
+        {<br>
+        int i,j,N;<br>
+        printf(&quot;ВВЕДИ N \n&quot;);<br>
+        scanf(&quot;%d&quot;,&amp;N);<br>
+        i=1;<br>
+        while(i &lt;=N)<br>
+        {<br>
+        j=1;<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while(j &lt;=i)<br>
+        {<br>
+        printf(&quot;%c&quot;,'*');<br>
+        j=j+1;<br>
+        }<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; i=i+1;<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf(&quot;\n&quot;);<br>
+        }<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left"><font face="Terminal" color="#804040">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </font><font face="Times New Roman" color="#000000">Рассмотрим еще один
+    пример, в котором используется сложный цикл.
+    Программа позволяет найти в заданном интервале
+    все совершенные числа. Напомним, что натуральное
+    число называютя совершенным, если оно равно
+    сумме всех своих делителей, считая его самого.
+    Известно, что все совершенные числа - четные и что
+    первое совершенное чсило из натурального ряда
+    чисел равно 6. Этим объясняется начальное
+    значение параметра внешнего цикла. Так&nbsp; как
+    все натуральные числа имеют своим делителем
+    единицу, полагаем начальное значение суммы
+    делителей числа S=1. Во внутренннем цикле
+    организуется перебор всех множителей текущего
+    значения N. Из теории чисел известно, что такому
+    испытанию имеет подвергать числа от 2 до N/2, либо
+    даже до &nbsp; корень из N. Это очень несовершенный
+    алгоритм и если вы захотите его выполнить на ЭВМ,
+    имейте ввиду, что программа работает слишком
+    долго. Более эффективно алгоритм будет
+    реализован попозже. </font></p>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Пример
+    1.9 </p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="75%">
+      <tr>
+        <td width="100%"><strong>#include &lt;stdio.h&gt;<br>
+        main()<br>
+        {<br>
+        int j,N,M,S;<br>
+        printf(&quot;ВВЕДИ M\n&quot;);<br>
+        scanf(&quot;%d&quot;,&amp;M);<br>
+        N=4;<br>
+        while(N&lt;=M)<br>
+        { S=1;j=2;<br>
+        &nbsp;&nbsp; while(j&lt;=N/2)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {<br>
+        if(N%j==0) S=S+j;<br>
+        j=j+1;<br>
+        }<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if(N==S)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf(&quot;%d- СОВЕРШЕННОЕ
+        ЧИСЛО\n&quot;,N);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N=N+2;<br>
+        }<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="center"><font face="Arial" color="#804040"><small><strong>&lt; <a
+    href="book004.htm" target="_self" style="color: rgb(128,64,64)">Назад</a> &gt;
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt; <a href="book006.htm"
+    style="color: rgb(128,64,64)">Дальше</a> &gt;</strong></small></font> </td>
+  </tr>
+</table>
+</center></div></font></strong></small>
+</body>
+</html>

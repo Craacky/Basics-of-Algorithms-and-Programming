@@ -1,0 +1,143 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
+<title>Документация по Cи, C++ и Visual C++</title>
+</head>
+
+<body background="../../background/bg6.gif" link="Black" vlink="Black" topmargin=2
+leftmargin="5" bgcolor="Aqua">
+
+<p align="center"><br>
+<font face="Arial" color="Maroon"><strong><big>Переключатель</big></strong></font></p>
+<div align="center"><center>
+
+<table width="90%" height="132" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="100%" height="132"><p align="left"><strong><font face="Arial" color="#0080FF"><big>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Стр. 15 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </big></font><font
+    face="Arial" color="#800000"><small>&lt; <a href="../visual_docum1.htm" target="_self"
+    style="color: rgb(128,64,64)">оглавление </a>&gt;</small></font></strong><font
+    face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></p>
+    <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Мы уже напоминали о
+    том, что использовать для многозадачного
+    ветвления в программе вложенные операторы <strong>if-then-else
+    </strong>Если глубина вложенности этих операторов
+    свыше трех, то конструкция теряет ясность. Более
+    наглядным и понятным в данной ситуации выглядит
+    оператор <strong>switch </strong>(<strong>переключатель</strong>),
+    специально предназначенный для принятия одного
+    из многих решений. Чаще всего этот оператор
+    выглядит следующим образом: </p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="43%">
+      <tr>
+        <td width="100%"><strong>switch(целое выражение)<br>
+        {<br>
+        case константа1: оператор1;<br>
+        case константа2: оператор2;<br>
+        ...<br>
+        ...<br>
+        ...<br>
+        case константаn: операторn;<br>
+        default&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; : оператор;<br>
+        }<br>
+        </strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left"><font face="Times New Roman" color="#000000">При
+    выполнении этого оператора вычисляется
+    выражение, стоящее в скобках после ключевого
+    слова <strong>switch, </strong>которое должно быть целым.
+    Оно, в частности, может быть и символьным
+    значением (в языке Си символьные значения
+    автоматически расширяются до целых значений).
+    Эта целая величина используется в качестве
+    критерия для выбора одного из возможных
+    вариантов. Ее значение сравнивается с константой
+    операторов <strong>case. </strong>Вместо целой или
+    литерной константы в операторе <strong>case</strong> может
+    стоять дае некоторое константное выражение.
+    Значения таких констант (выражений) должны быть
+    различными в разных операторах <strong>case. </strong>При
+    несовпадении выполняется переход к следующему <strong>case
+    </strong>и сравнивается его константа. В случае
+    совпадения &quot;<strong>константы_i&quot;</strong>
+    выполняется<strong> &quot;оператор_i&quot;, </strong>а также
+    все последующие операторы <strong>case </strong>и<strong> default.
+    </strong>Если не было ни одного совпадения и имеется
+    оператор <strong>default</strong>,<strong> </strong>то выполняется
+    стоящий за ним оператор. Если же оператора <strong>default
+    </strong>не было, выполнение программы продолжится с
+    оператора, следующего за структурой <strong>switch. </strong>Таким
+    образом, при каждом выполнении оператора
+    просматриваются все метки <strong>case. </strong>Рассмотрим
+    следующую программу (пример 5.2) </font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Пример 5.2</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="46%">
+      <tr>
+        <td width="100%"><strong>/*проверка switch*/<br>
+        #include &lt;stdio.h&gt;<br>
+        main()<br>
+        {<br>
+        int k=2;<br>
+        switch(k)<br>
+        {<br>
+        &nbsp; case 0; printf(&quot;выбор 0\n&quot;);<br>
+        &nbsp; case 1; printf(&quot;выбор 1\n&quot;);<br>
+        &nbsp; case 2; printf(&quot;выбор 2\n&quot;);<br>
+        &nbsp; case 3; printf(&quot;выбор 3\n&quot;);<br>
+        &nbsp; default: printf(&quot;default\n&quot;);<br>
+        &nbsp; }<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left"><font face="Times New Roman" color="#000000">&nbsp; Как
+    видите, происходит то, о чем мы говорили:
+    выполняется альтернатива, соответствующая <strong>k=2
+    </strong>и все последующие операторы <strong>case, </strong>а
+    также выриант <strong>default. </strong>Чтобы обеспечить
+    выбор одного из многих вариантов (что и требуется
+    чаще всего), используют обычно оператор <strong>braek, </strong>который
+    вызывает немедленный выход из оператора <strong>switch</strong>
+    (пример 5.3) Для этой цели можно применять и
+    оператор <strong>return, </strong>а<strong> continue </strong>можно
+    применять лишь в случае, когда сам оператор <strong>switch
+    </strong>находится внутри цикла. Тогда <strong>continue</strong>
+    вызывает немедленный переход к следующей
+    интеракции, без рассмотрения оставшихся <strong>case. </strong></font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Пример 5.3</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="61%">
+      <tr>
+        <td width="100%"><strong>/*проверка switch*/<br>
+        #include &lt;stdio.h&gt;<br>
+        main()<br>
+        {<br>
+        int k=2;<br>
+        switch(k)<br>
+        {<br>
+        &nbsp; case 0; printf(&quot;выбор 0\n&quot;);<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; break;<br>
+        &nbsp; case 1; printf(&quot;выбор 1\n&quot;);<br>
+        &nbsp;&nbsp; break;<br>
+        &nbsp; case 2; printf(&quot;выбор 2\n&quot;);<br>
+        &nbsp; break;<br>
+        &nbsp; case 3; printf(&quot;выбор 3\n&quot;); <br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; break;<br>
+        &nbsp; default: printf(&quot;default\n&quot;);<br>
+        }<br>
+        }<br>
+        </strong></td>
+      </tr>
+    </table>
+    </center></div><p align="center"><font face="Arial" color="#804040"><small><strong>&lt; <a
+    href="book014.htm" target="_self" style="color: rgb(128,64,64)">Назад</a> &gt;
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt; <a href="book016.htm"
+    style="color: rgb(128,64,64)">Дальше</a> &gt;</strong></small></font><br>
+    </td>
+  </tr>
+</table>
+</center></div>
+</body>
+</html>

@@ -1,0 +1,307 @@
+<html>
+
+<head>
+<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
+<title>Документация по Cи, C++ и Visual C++</title>
+</head>
+
+<body background="../../background/bg6.gif" link="Black" vlink="Black" topmargin=2
+leftmargin="5" bgcolor="Aqua">
+
+<p align="center"><strong><big><font face="Arial" color="Maroon">МАССИВЫ&nbsp;</font><font
+color="#FF0000" face="Arial">&nbsp; </font></big></strong></p>
+<div align="center"><center>
+
+<table width="90%" height="132" border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td width="100%" height="132"><p align="left"><strong><font face="Arial" color="#0080FF"><big>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Стр. 10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </big></font><font
+    face="Arial" color="#800000"><small>&lt; <a href="../visual_docum1.htm" target="_self"
+    style="color: rgb(128,64,64)">оглавление </a>&gt;</small></font></strong><font
+    face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font></p>
+    <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Как известно, <strong>массив
+    </strong>- это конечная совокупность данных одного
+    типа. Можно говорить о массивах целых чисел,
+    массивов символов и.т.д. Мы можем даже определить
+    масссив, элементы которого - массивы( массив
+    массивов), определяя, таким образм, многомерные
+    массивы. Любой массив в программе должен быть
+    описан: после имени массива добаляют квадратные
+    скобки <strong>[], </strong>внутри которых обычно стоит
+    число, показывающее количество элементов
+    массива. Например, запись <strong>int x[10]</strong>;
+    определяет <strong>x</strong> как массив из 10 целых чисел.
+    В случае многомерных массивов показывают
+    столько пар скобок , какова размерность массива,
+    а число внутри скобок показывает размер массива
+    по данному измерению. Например, описание
+    двумерного массива выглядит так: <strong>int a[2][5];. </strong>Такое
+    описание можно трактовать как матрицу из 2 строк
+    и 5 столбцов. Для обрщения к некоторому элементу
+    массива указывают его имя и индекс, заключенный в
+    квадратные скобки(для многомерног массива -
+    несколько индексов , заключенные в отдельные
+    квадратные скобки)<strong>: a[1][3], x[i] a[0][k+2]. </strong>Индексы
+    массива в Си всегда начинаются с 0, а не с 1, т.е.
+    описание <strong>int x[5]; </strong>порождает элементы <strong>x[0],
+    x[1], x[2], x[3], x[4], x[5]. </strong>Индекс может быть не только
+    целой константой или целой переменной, но и любым
+    выражением целого типа. Переменная с индексами в
+    программе используется наравне с простой
+    переменной (например, в операторе присваивания, в
+    функциях ввода- вывода). Начальные значения
+    массивам в языке Си могут быть присвоены при
+    компиляции только в том случае, если они
+    объявлены с классом памяти <strong>extern </strong>или <strong>static</strong>,
+    например: </p>
+    <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <strong>static int
+    a[6]={5,0,4,-17,49,1};&nbsp;&nbsp;&nbsp;<br>
+    &nbsp;&nbsp; </strong>обеспечивает присвоения <strong>a[0]=5;
+    a[1]=0; a[2]=4 ... a[5]=1. </strong>Как видите, для начального
+    присвоения значений некоторому массиву надо в
+    описании поместить справа от знака = список
+    инициирующих значений, заключенные в фигурные
+    скобки и разделенные запятыми. Двумерный массив
+    можно инициировать так: </p>
+    <p align="left">&nbsp;&nbsp;&nbsp;&nbsp; <strong>static int matr[2][5] =
+    {{3,4,0,1,2},{6,5,1,4,9}}</strong>;&nbsp;&nbsp; </p>
+    <p align="left">Матрица хранится в памяти построчно, т.е.
+    самый правый индекс в наборе индексов массива
+    меняется наиболее быстро. <br>
+    &nbsp;&nbsp; Пусть, например, в заданном массиве из 10
+    целых чисел надо изменить порядок следования его
+    элементов на обратный без привлечения
+    вспомагательного массива. Соответствующая
+    прорамма приведена на примере 3.6 . </p>
+    <p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Пример 3.6</p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="48%">
+      <tr>
+        <td width="100%"><strong>/*обращение массива*/<br>
+        #include &lt;stdio.h&gt;<br>
+        main()<br>
+        {<br>
+        int p,i=0;<br>
+        static a[10]={10,11,12,13,14,<br>
+        &nbsp;&nbsp; 15,16,17,18,19};<br>
+        while(i&lt;10/2)<br>
+        {<br>
+        p=a[i];<br>
+        a[i]=a[9-i];<br>
+        a[9-i]=p;<br>
+        i++;<br>
+        }<br>
+        i=0;<br>
+        while(i&lt;10)<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printf(&quot; %d&quot;,a[i++]);<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Следующяя программа (пример 3.7)</font><font face="Arial"
+    color="#804040"><small><strong> </strong></small></font><font face="Times New Roman"
+    color="#000000">позволяет в целочисленном массиве найти
+    разность максимального и минимального элемента .
+    Обратите внимание, что функция <strong>fmax </strong>при
+    первом обращении к ней дает максимальный элемент
+    массива, а при повторном вызове -&nbsp; минимальный,
+    так как предварительно мы изменили знаки
+    элементов на противоположные. Это изменение
+    знаков учитывается при вызове функции <strong>printf. </strong>В
+    языке Си отсутствует возможность динамически
+    распределять память под массивы: надо при
+    описании массива задать точно его размер. Но если
+    тот же массив описывается еще раз в другой
+    программе, размеры можно не указывать;достаточно
+    после имени сохранить пару квадратных скобок,
+    например <strong>int x[]. </strong>Если при вызове функции в
+    качестве аргумента ей передается имя массива, то,
+    в отличае от простых переменных, берется
+    фактически адрес начала этого массива. Поэтому
+    записи <strong>fmax(a, 10) </strong>и <strong>fmax(&amp;a[0], 10) </strong>равносильны.</font></p>
+    <p align="left"><font face="Times New Roman" color="#000000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    Пример 3.7</font></p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="37%">
+      <tr>
+        <td width="100%"><strong>/*в массиве найти разность <br>
+        &nbsp;&nbsp; мин. и макс. элементов */<br>
+        int fmax(x,n)<br>
+        int x[],n;<br>
+        {<br>
+        int max, i=0; max=x[0];<br>
+        while(i&lt;n)<br>
+        {<br>
+        if(x[i]&gt; max)<br>
+        &nbsp;&nbsp; max=x[i];<br>
+        i++;<br>
+        }<br>
+        return(max);<br>
+        }<br>
+        #include &lt;stdio.h&gt;<br>
+        main()<br>
+        {<br>
+        static int a[10]=<br>
+        {1,-2,3,-4,5,-6,7,-8,9,-13};<br>
+        max=fmax(a,10);<br>
+        i=0;<br>
+        while(i&lt;10)<br>
+        {<br>
+        a[i]=-a[i];<br>
+        i++;<br>
+        }<br>
+        main=fmax(a,10);<br>
+        printf(&quot;макс-мин=%d\n&quot;,max+min);<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left">&nbsp;&nbsp; В следующем пример 3.8
+    массив описан как внешний. Функция main
+    подсчитывает наибольшее число одинаковых идущих
+    подряд элементов массива, определенного вне
+    функции main. </p>
+    <p align="left">&nbsp;&nbsp;&nbsp; Пример 3.8</p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="51%">
+      <tr>
+        <td width="100%"><strong>/*макс одинаковых подряд*/<br>
+        #include &lt;stdio.h&gt;<br>
+        int a[]={5,6,6,6,4,3,3,3,3,3,8};<br>
+        int n=10;<br>
+        main()<br>
+        {<br>
+        int i,k,max;<br>
+        i=k=max=1;<br>
+        while(i&lt;n)<br>
+        {<br>
+        if(a[i]==a[i-1])<br>
+        k++;<br>
+        else <br>
+        {<br>
+        if(k&gt;max)max=k;<br>
+        k=1;<br>
+        }<br>
+        i++;<br>
+        }<br>
+        printf(&quot;kmax=%d\n&quot;,(k&gt;max)?k:max);<br>
+        }<br>
+        </strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left">&nbsp;&nbsp; Если, как в данном
+    примере, размер массива пропущен, то транслятор
+    определит его дляну, считая присваиваемые
+    значения во время начальной инициализации.
+    Условная операция (<strong>k&gt;max</strong>)<strong>?k:max </strong>в
+    операторе <strong>printf </strong>предусмотрена для того
+    частного случая, когда весь массив состоит из
+    одинаковых элементов. Приведем несколько
+    примеров, в которых ведется обработка двумерных
+    массивов. Но прежде одну полезную возможносить
+    языка Си. Речь идет о препроцессорном
+    утверждении <strong>#difine</strong>, позволяющем
+    присваивать символические имена константам. В
+    общем случае это утверждение записывают так: <strong>#define
+    строка1 строка2 </strong>(точка с запятой не ставится)<strong>.
+    </strong><br>
+    &nbsp;&nbsp; Прежде чем исходный текст программы будет
+    передан компилятору, он обрабатывается
+    препроцессором, котоый всюду в исходном тексте<strong>
+    </strong>заменит вхождение &quot;строка1&quot; на
+    &quot;строка2&quot;. Например, строка <strong>#difine max 80, </strong>записанная
+    в начале программы, обеспечит всюду замену
+    указанного имени <strong>max </strong>на соответствующую
+    константу. Замена имени связана не только
+    числами, но и текстами. А теперь вернемся к
+    примерам. В следующей программе (пример 3.9)
+    строится единичная матрица <strong>a[m][m], </strong>размер
+    которой определяется с помощью конструкции <strong>#difine
+    m 5. </strong>Сам алгоритм вычисления элементов
+    матрицы основан на возведении <strong>(i/j)*(j/i) </strong>равно
+    единице тогда и только тогда. когда <strong>i </strong>равно
+    <strong>j. </strong>В остальных случаях оно равно нулю.</p>
+    <p align="left">&nbsp; Пример 3.9</p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="55%">
+      <tr>
+        <td width="100%"><strong>#define M 5<br>
+        #include &lt;stdio.h&gt;<br>
+        main()<br>
+        {<br>
+        int a[M][M];<br>
+        int j,i=0;<br>
+        while(i&lt;M)<br>
+        {<br>
+        j=1;<br>
+        while(j&lt;M)<br>
+        {<br>
+        a[i][j]=(i/j)*(j/i);<br>
+        printf(&quot;%d&quot;,a[i][j]);<br>
+        j++;<br>
+        }<br>
+        i++;printf(&quot;\n&quot;);<br>
+        }<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; В программе
+    (пример 4.0) определяется минимальный элемент
+    кажой строки матрицы и выполняется обмен местами
+    найденого и диагональю этой же строки.&nbsp;<br>
+    &nbsp;&nbsp; Обращаем внимание на следующее
+    обстоятельство. Если двумерный массив надо
+    передать ыункции, то описание параметра в ней
+    должно обязательно включать в себя размер строки
+    массива, а размер столбцов несущественен. Так,
+    массив из трех строк и пяти столбцов можно
+    описать как <strong>int a[3][5]; </strong>либо <strong>int a[][5];</strong></p>
+    <p align="left">&nbsp;&nbsp; Пример 4.0</p>
+    <div align="center"><center><table border="0" cellpadding="0" cellspacing="0" width="56%">
+      <tr>
+        <td width="100%"><strong>/*обмен мин с диагональю*/<br>
+        #include &lt;stdio.h&gt;<br>
+        #define M 4<br>
+        main()<br>
+        {<br>
+        static a[M][M]={<br>
+        &nbsp;&nbsp; { 3,4,1,5),<br>
+        &nbsp;&nbsp; {-1,6,7,0},<br>
+        &nbsp;&nbsp; { 1,8,7,-1},<br>
+        &nbsp;&nbsp; { 4,9,7,-1}};<br>
+        int i, j, jmin, amin;<br>
+        i=0;<br>
+        while(i&lt;M)<br>
+        {<br>
+        amin=a[i][0];<br>
+        jmin=0;j=1;<br>
+        while(j&lt;m)<br>
+        {<br>
+        if(a[i][j]&lt;amin)<br>
+        {<br>
+        amin=a[i][j];<br>
+        jmin=j;<br>
+        } <br>
+        j++;<br>
+        }<br>
+        a[i][jmin]=a[i][i];<br>
+        a[i][i]=amin;<br>
+        i++;<br>
+        }<br>
+        i=0<br>
+        while(i&lt;M)<br>
+        {<br>
+        j=0;<br>
+        while(j&lt;M)<br>
+        printf(&quot;%3d&quot;,a[i][j++]);<br>
+        &nbsp;&nbsp;&nbsp; printf(&quot;\n&quot;);<br>
+        i++;<br>
+        }<br>
+        }</strong></td>
+      </tr>
+    </table>
+    </center></div><p align="center"><font face="Arial" color="#804040"><small><strong>&lt; <a
+    href="book009.htm" target="_self" style="color: rgb(128,64,64)">Назад</a> &gt;
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt; <a href="book011.htm"
+    style="color: rgb(128,64,64)">Дальше</a> &gt;</strong></small></font><br>
+    </td>
+  </tr>
+</table>
+</center></div>
+</body>
+</html>
