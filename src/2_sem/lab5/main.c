@@ -7,7 +7,7 @@ int main()
     pointer = insert_node(pointer, 5, "Kolya Yakutin");
     pointer = insert_node(pointer, 6, "Ilya Yurkevich");
     pointer = insert_node(pointer, 7, "Dasha Leonovets");
-    pointer = insert_node(pointer, 1, "Uliana Chaykovckaya");
+    pointer = insert_node(pointer, 3, "Uliana Chaykovckaya");
     pointer = insert_node(pointer, 2, "Egor Moroz");
     print_tree(pointer, 0);
     int index = 0;

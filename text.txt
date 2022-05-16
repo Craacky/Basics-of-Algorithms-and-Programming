@@ -1,0 +1,16 @@
+ 1 Naruto 4.20
+ 2 Bleach 5.70
+ 3 One Piece 6.10
+ 4 Hunter x Hunter 8.30
+ 5 Death Node 9.60
+ 6 Samurai Champloo 10.50
+ 7 Death Note 4.20
+ 8 Dragon Ball 5.70
+ 9 Ghost in the Shell 3.80
+ 10 Seven Samurai 12.70
+ 11 Durara 18.80
+ 12 Princess Mononoke 8.30
+ 13 Attack on Titan 12.70
+ 14 Evangelion 4.20
+ 15 Apple Seed 6.10
+ 16 JoJo Bizarre Adventure 18.80
