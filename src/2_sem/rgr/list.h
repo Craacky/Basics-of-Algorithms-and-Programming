@@ -153,3 +153,68 @@ void sort_node(theatre *head)
     }
     printf("---------------------------------------------\n");
 }
+
+void filter_node(theatre *head)
+{
+    char filter_check[255];
+    int filter_index = 0;
+    char filter_name[255];
+    double filter_price = 0;
+
+    printf("Enter parameter for filter:\n");
+    printf("-index\n");
+    printf("-name\n");
+    printf("-price\n");
+    scanf("%s", filter_check);
+    if (strcmp(filter_check, "index") == 0)
+    {
+        printf("Enter index parameter for filter:");
+        scanf("%d", &filter_index);
+        while (head->next != NULL)
+        {
+            if (filter_index == head->index)
+            {
+                printf("| %-3d | %-25s | %-7.2lf |\n", head->index, head->cinema_name, head->price);
+                head = head->next;
+            }
+            else
+            {
+                head = head->next;
+            }
+        }
+    }
+    if (strcmp(filter_check, "name") == 0)
+    {
+        printf("Enter name parameter for filter:");
+        scanf("%s", filter_name);
+        while (head->next != NULL)
+        {
+            if (strstr(head->cinema_name, filter_name))
+            {
+                printf("| %-3d | %-25s | %-7.2lf |\n", head->index, head->cinema_name, head->price);
+                head = head->next;
+            }
+            else
+            {
+                head = head->next;
+            }
+        }
+    }
+    if (strcmp(filter_check, "price") == 0)
+    {
+        printf("Enter index parameter for filter:");
+        scanf("%lf", &filter_price);
+        while (head->next != NULL)
+        {
+            if (filter_price == head->price)
+            {
+                printf("| %-3d | %-25s | %-7.2lf |\n", head->index, head->cinema_name, head->price);
+                head = head->next;
+            }
+            else
+            {
+                head = head->next;
+            }
+        }
+    }
+}
