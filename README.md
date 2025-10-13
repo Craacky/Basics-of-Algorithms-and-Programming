@@ -1,4 +1,4 @@
-# Основы Алгоритмов и Программирования (ОАиП) / Basics of Algorithms and Programming (OAP)
+# Basics of Algorithms and Programming (OAP)
 
 <p align="center">
   <img src="https://img.shields.io/badge/C-Programming-blue?style=for-the-badge&logo=c" alt="C Programming">
@@ -7,168 +7,165 @@
 </p>
 
 <p align="center">
-  <em>Коллекция лабораторных работ по основам алгоритмов и программирования</em><br>
   <em>A collection of laboratory works on the basics of algorithms and programming</em>
 </p>
 
 ---
 
-## 📚 Содержание / Table of Contents
+## 📚 Table of Contents
 
-- [Описание / Description](#-описание--description)
-- [Структура проекта / Project Structure](#-структура-проекта--project-structure)
-- [Лабораторные работы 1 семестра / First Semester Labs](#-лабораторные-работы-1-семестра--first-semester-labs)
-- [Лабораторные работы 2 семестра / Second Semester Labs](#-лабораторные-работы-2-семестра--second-semester-labs)
-- [Расчетно-графическая работа / Calculation and Graphic Work](#-расчетно-графическая-работа--calculation-and-graphic-work)
-- [Технологии / Technologies](#-технологии--technologies)
-- [Установка / Installation](#-установка--installation)
-- [Лицензия / License](#-лицензия--license)
+- [Description](#-description)
+- [Project Structure](#-project-structure)
+- [First Semester Labs](#-first-semester-labs)
+- [Second Semester Labs](#-second-semester-labs)
+- [Calculation and Graphic Work](#-calculation-and-graphic-work)
+- [Technologies](#-technologies)
+- [Installation](#-installation)
+- [License](#-license)
 
 ---
 
-## 📘 Описание / Description
-
-Этот репозиторий содержит решения лабораторных работ по дисциплине "Основы Алгоритмов и Программирования". В процессе выполнения работ были изучены основы программирования на языке C, алгоритмы, структуры данных и файловая работа.
+## 📘 Description
 
 This repository contains solutions for laboratory works in the "Basics of Algorithms and Programming" course. Throughout the works, fundamental programming concepts in C, algorithms, data structures, and file handling were studied.
 
 ---
 
-## 📁 Структура проекта / Project Structure
+## 📁 Project Structure
 
 ```
 src/
-├── 1_Sem/              # Лабораторные работы 1 семестра / First semester labs
-│   ├── lab1/           # Лабораторная работа 1 / Lab 1
-│   ├── lab2/           # Лабораторная работа 2 / Lab 2
-│   ├── lab3/           # Лабораторная работа 3 / Lab 3
-│   ├── lab4/           # Лабораторная работа 4 / Lab 4
-│   ├── lab5/           # Лабораторная работа 5 / Lab 5
-│   ├── lab6/           # Лабораторная работа 6 / Lab 6
-│   ├── lab7/           # Лабораторная работа 7 / Lab 7
-│   └── rgr/            # Расчетно-графическая работа / Calculation and Graphic Work
-└── 2_sem/              # Лабораторные работы 2 семестра / Second semester labs
-    ├── lab1/           # Лабораторная работа 1 / Lab 1
-    ├── lab2/           # Лабораторная работа 2 / Lab 2
-    ├── lab3/           # Лабораторная работа 3 / Lab 3
-    ├── lab4/           # Лабораторная работа 4 / Lab 4
-    ├── lab5/           # Лабораторная работа 5 / Lab 5
-    └── rgr/            # Расчетно-графическая работа / Calculation and Graphic Work
+├── 1_Sem/              # First semester labs
+│   ├── lab1/           # Lab 1
+│   ├── lab2/           # Lab 2
+│   ├── lab3/           # Lab 3
+│   ├── lab4/           # Lab 4
+│   ├── lab5/           # Lab 5
+│   ├── lab6/           # Lab 6
+│   ├── lab7/           # Lab 7
+│   └── rgr/            # Calculation and Graphic Work
+└── 2_sem/              # Second semester labs
+    ├── lab1/           # Lab 1
+    ├── lab2/           # Lab 2
+    ├── lab3/           # Lab 3
+    ├── lab4/           # Lab 4
+    ├── lab5/           # Lab 5
+    └── rgr/            # Calculation and Graphic Work
 ```
 
 ---
 
-## 🧪 Лабораторные работы 1 семестра / First Semester Labs
+## 🧪 First Semester Labs
 
-### 🧪 Lab 1: Основы языка C / C Language Basics
-- **task1.c** - Простая программа сложения двух чисел / Simple addition program of two numbers
-- **task2.c** - Простые арифметические операции / Simple arithmetic operations
-- **task3.c** - Работа с переменными и выводом на экран / Working with variables and screen output
-- **task4.c** - Ввод-вывод данных / Input-output operations
-- **task5.c** - Базовые операции с числами / Basic number operations
+### 🧪 Lab 1: C Language Basics
+- **task1.c** - Simple addition program of two numbers
+- **task2.c** - Simple arithmetic operations
+- **task3.c** - Working with variables and screen output
+- **task4.c** - Input-output operations
+- **task5.c** - Basic number operations
 
-### 🧪 Lab 2: Арифметические операции / Arithmetic Operations
-- **task1.c** - Основные арифметические операции (сложение, вычитание, умножение, деление, остаток от деления) / Basic arithmetic operations (addition, subtraction, multiplication, division, remainder)
-- **task2.c** - Работа с арифметическими выражениями / Working with arithmetic expressions
-- **task3.c** - Вычисления с целыми числами / Calculations with integers
-- **task4.c** - Работа с приоритетами операций / Working with operation priorities
-- **task5.c** - Примеры арифметических вычислений / Examples of arithmetic calculations
-- **task6.c** - Сложные арифметические выражения / Complex arithmetic expressions
+### 🧪 Lab 2: Arithmetic Operations
+- **task1.c** - Basic arithmetic operations (addition, subtraction, multiplication, division, remainder)
+- **task2.c** - Working with arithmetic expressions
+- **task3.c** - Calculations with integers
+- **task4.c** - Working with operation priorities
+- **task5.c** - Examples of arithmetic calculations
+- **task6.c** - Complex arithmetic expressions
 
-### 🧪 Lab 3: Условные операторы / Conditional Statements
-- **task1.c** - Использование if-else для сравнения чисел / Using if-else for number comparison
-- **task2.c** - Условные конструкции / Conditional constructs
-- **task3.c** - Сравнение значений / Value comparison
-- **task4.c** - Вложенные условные операторы / Nested conditional statements
-- **task5.c** - Логические выражения / Logical expressions
-- **task6.c** - Комбинированные условия / Combined conditions
+### 🧪 Lab 3: Conditional Statements
+- **task1.c** - Using if-else for number comparison
+- **task2.c** - Conditional constructs
+- **task3.c** - Value comparison
+- **task4.c** - Nested conditional statements
+- **task5.c** - Logical expressions
+- **task6.c** - Combined conditions
 
-### 🧪 Lab 4: Циклы / Loops
-- **task1.c** - Использование цикла for / Using for loop
-- **task2.c** - Цикл while / While loop
-- **task3.c** - Цикл do-while / Do-while loop
-- **task4.c** - Вложенные циклы / Nested loops
-- **task5.c** - Примеры использования циклов / Examples of loop usage
-- **task6.c** - Сложные циклические конструкции / Complex loop constructs
+### 🧪 Lab 4: Loops
+- **task1.c** - Using for loop
+- **task2.c** - While loop
+- **task3.c** - Do-while loop
+- **task4.c** - Nested loops
+- **task5.c** - Examples of loop usage
+- **task6.c** - Complex loop constructs
 
-### 🧪 Lab 5: Массивы / Arrays
-- **task1.c** - Создание и инициализация массивов / Creating and initializing arrays
-- **task2.c** - Обращение к элементам массива / Accessing array elements
-- **task3.c** - Поиск элементов в массиве / Searching for elements in an array
-- **task4.c** - Сортировка массивов / Sorting arrays
-- **task5.c** - Работа с многомерными массивами / Working with multidimensional arrays
-- **task6.c** - Примеры обработки массивов / Examples of array processing
+### 🧪 Lab 5: Arrays
+- **task1.c** - Creating and initializing arrays
+- **task2.c** - Accessing array elements
+- **task3.c** - Searching for elements in an array
+- **task4.c** - Sorting arrays
+- **task5.c** - Working with multidimensional arrays
+- **task6.c** - Examples of array processing
 
-### 🧪 Lab 6: Функции / Functions
-- **task1.c** - Создание простых функций / Creating simple functions
-- **task2.c** - Функции с параметрами / Functions with parameters
-- **task3.c** - Функции с возвращаемым значением / Functions with return value
-- **task4.c** - Рекурсивные функции / Recursive functions
-- **task5.c** - Примеры использования функций / Examples of function usage
-- **task6.c** - Комплексные функции / Complex functions
+### 🧪 Lab 6: Functions
+- **task1.c** - Creating simple functions
+- **task2.c** - Functions with parameters
+- **task3.c** - Functions with return value
+- **task4.c** - Recursive functions
+- **task5.c** - Examples of function usage
+- **task6.c** - Complex functions
 
-### 🧪 Lab 7: Указатели / Pointers
-- **task1.c** - Основы работы с указателями / Basics of working with pointers
-- **task2.c** - Арифметика указателей / Pointer arithmetic
-- **task3.c** - Указатели и массивы / Pointers and arrays
-- **task4.c** - Указатели на функции / Pointers to functions
-- **task5.c** - Динамическое выделение памяти / Dynamic memory allocation
-- **task6.c** - Примеры сложных указательных операций / Examples of complex pointer operations
-
----
-
-## 🧪 Лабораторные работы 2 семестра / Second Semester Labs
-
-### 🧪 Lab 1: Работа с файлами / File Operations
-- **main.c** - Создание и объединение бинарных файлов, поиск минимальных значений / Creating and merging binary files, finding minimum values
-
-### 🧪 Lab 2: Структуры и файлы / Structures and Files
-- **main.c** - Работа со структурами данных и файлами / Working with data structures and files
-- **main.h** - Заголовочный файл с определениями структур / Header file with structure definitions
-
-### 🧪 Lab 3: Структуры данных / Data Structures
-- **main.c** - Продвинутая работа со структурами / Advanced work with structures
-
-### 🧪 Lab 4: Динамические структуры / Dynamic Structures
-- **main.c** - Работа с динамически выделенной памятью / Working with dynamically allocated memory
-
-### 🧪 Lab 5: Алгоритмы и структуры / Algorithms and Structures
-- **main.c** - Реализация различных алгоритмов и структур данных / Implementation of various algorithms and data structures
+### 🧪 Lab 7: Pointers
+- **task1.c** - Basics of working with pointers
+- **task2.c** - Pointer arithmetic
+- **task3.c** - Pointers and arrays
+- **task4.c** - Pointers to functions
+- **task5.c** - Dynamic memory allocation
+- **task6.c** - Examples of complex pointer operations
 
 ---
 
-## 📊 Расчетно-графическая работа / Calculation and Graphic Work
+## 🧪 Second Semester Labs
 
-### 📊 RGR 1 семестр / RGR First Semester
-- **task1.c** - Задание 1 расчетно-графической работы / Task 1 of calculation and graphic work
-- **task2.c** - Задание 2 расчетно-графической работы / Task 2 of calculation and graphic work
-- **task3.c** - Задание 3 расчетно-графической работы / Task 3 of calculation and graphic work
-- **task4.c** - Задание 4 расчетно-графической работы / Task 4 of calculation and graphic work
-- **task5.c** - Задание 5 расчетно-графической работы / Task 5 of calculation and graphic work
-- **task6.c** - Задание 6 расчетно-графической работы / Task 6 of calculation and graphic work
-- **task7.c** - Задание 7 расчетно-графической работы / Task 7 of calculation and graphic work
+### 🧪 Lab 1: File Operations
+- **main.c** - Creating and merging binary files, finding minimum values
 
-### 📊 RGR 2 семестр / RGR Second Semester
-- **main.c** - Основной файл расчетно-графической работы / Main file of calculation and graphic work
-- **list.h** - Заголовочный файл с определениями структур / Header file with structure definitions
-- **firtst pull.txt** - Текстовый файл с информацией / Text file with information
+### 🧪 Lab 2: Structures and Files
+- **main.c** - Working with data structures and files
+- **main.h** - Header file with structure definitions
 
----
+### 🧪 Lab 3: Data Structures
+- **main.c** - Advanced work with structures
 
-## 💻 Технологии / Technologies
+### 🧪 Lab 4: Dynamic Structures
+- **main.c** - Working with dynamically allocated memory
 
-- **Язык программирования:** C / Programming Language: C
-- **Средства разработки:** GCC (GNU Compiler Collection)
-- **Система контроля версий:** Git / Version Control System: Git
-- **Интегрированная среда разработки:** VS Code / Integrated Development Environment: VS Code
+### 🧪 Lab 5: Algorithms and Structures
+- **main.c** - Implementation of various algorithms and data structures
 
 ---
 
-## 🛠 Установка / Installation
+## 📊 Calculation and Graphic Work
 
-Для компиляции и запуска программ: / To compile and run programs:
+### 📊 RGR First Semester
+- **task1.c** - Task 1 of calculation and graphic work
+- **task2.c** - Task 2 of calculation and graphic work
+- **task3.c** - Task 3 of calculation and graphic work
+- **task4.c** - Task 4 of calculation and graphic work
+- **task5.c** - Task 5 of calculation and graphic work
+- **task6.c** - Task 6 of calculation and graphic work
+- **task7.c** - Task 7 of calculation and graphic work
 
-1. Установите GCC: / Install GCC:
+### 📊 RGR Second Semester
+- **main.c** - Main file of calculation and graphic work
+- **list.h** - Header file with structure definitions
+- **firtst pull.txt** - Text file with information
+
+---
+
+## 💻 Technologies
+
+- **Programming Language:** C
+- **Development Tools:** GCC (GNU Compiler Collection)
+- **Version Control System:** Git
+- **Integrated Development Environment:** VS Code
+
+---
+
+## 🛠 Installation
+
+To compile and run programs:
+
+1. Install GCC:
    ```bash
    # Ubuntu/Debian
    sudo apt-get install build-essential
@@ -180,28 +177,28 @@ src/
    xcode-select --install
    ```
 
-2. Склонируйте репозиторий: / Clone the repository:
+2. Clone the repository:
    ```bash
    git clone https://github.com/yourusername/oaip.git
    cd oaip
    ```
 
-3. Скомпилируйте программу: / Compile the program:
+3. Compile the program:
    ```bash
    cd src/1_Sem/lab1
    gcc task1.c -o task1
    ```
 
-4. Запустите программу: / Run the program:
+4. Run the program:
    ```bash
    ./task1
    ```
 
 ---
 
-## 📄 Лицензия / License
+## 📄 License
 
-Этот проект лицензирован под [MIT License](LICENSE). / This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
 
 ```
 MIT License
