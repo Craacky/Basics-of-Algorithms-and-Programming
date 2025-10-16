@@ -1,4 +1,4 @@
-# Basics of Algorithms and Programming (OAP)
+# Basics of Algorithms and Programming
 
 <p align="center">
   <img src="https://img.shields.io/badge/C-Programming-blue?style=for-the-badge&logo=c" alt="C Programming">
